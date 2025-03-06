@@ -29,8 +29,15 @@ def get_cell_features_xlsx(cur_cell):
 def get_table_features(file_path, sheet_name) -> pd.DataFrame:
     wb = openpyxl.load_workbook(file_path)
     ws = wb[sheet_name]
+
+    # Determine the actual data range
+    min_row = ws.min_row
+    max_row = ws.max_row
+    min_col = ws.min_column
+    max_col = ws.max_column
+
     data = []
-    for row in ws.iter_rows():
+    for row in ws.iter_rows(min_row=min_row, max_row=max_row, min_col=min_col, max_col=max_col):
         for cell in row:
             data.append(get_cell_features_xlsx(cell))
 

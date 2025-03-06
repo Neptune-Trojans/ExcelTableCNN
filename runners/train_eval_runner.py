@@ -1,4 +1,6 @@
 import ast
+import argparse
+
 
 import pandas as pd
 import torch
@@ -31,9 +33,16 @@ def get_device() -> torch.device:
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Do all the things')
+    parser.add_argument('--labels_file', type=str, help='file with the labels')
+    parser.add_argument('--data_folder', type=str, help='excel files folder')
+    parser.add_argument('--output_folder', type=str, help='output folder')
+    args = parser.parse_args()
+
+
     init_dataframe_view()
-    train_df, test_df = get_train_test(train_size=12, testing_size=4,
-                                      data_folder_path=data_folder_path)
+    train_df, test_df = get_train_test(args.labels_file, args.data_folder, args.output_folder)
+
     train_df = pd.read_pickle('/Users/arito/Data/TableSense/train_features.pkl')
     test_df = pd.read_pickle('/Users/arito/Data/TableSense/test_features.pkl')
 

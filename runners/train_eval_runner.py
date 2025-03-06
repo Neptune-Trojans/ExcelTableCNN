@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
 
     init_dataframe_view()
-    train_df, test_df = get_train_test(args.labels_file, args.data_folder, args.output_folder)
+    # train_df, test_df = get_train_test(args.labels_file, args.data_folder, args.output_folder)
 
     train_df = pd.read_pickle(os.path.join(args.output_folder, "train_features.pkl"))
     test_df = pd.read_pickle(os.path.join(args.output_folder, "test_features.pkl"))

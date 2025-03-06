@@ -1,6 +1,7 @@
 from typing import List, Tuple, Optional
 
 import pandas as pd
+import numpy as np
 from tqdm import tqdm
 import torch
 from openpyxl.utils.cell import coordinate_to_tuple, range_boundaries
@@ -42,19 +43,34 @@ class DataframeTensors:
             if self.num_cell_features is None:
                 self.num_cell_features = len(group.columns) - len(non_feature_columns)
 
-            sheet_tensor = torch.zeros((max_rows, max_cols, self.num_cell_features))
-
-            for _, row in group.iterrows():
-                row_idx, col_idx = parse_coordinate(row["coordinate"])
-                cell_features = preprocess_features(row.drop(non_feature_columns))
-                sheet_tensor[row_idx, col_idx, :] = cell_features
-
+            # sheet_tensor = torch.zeros((max_rows, max_cols, self.num_cell_features))
+            #
+            # for _, row in group.iterrows():
+            #     row_idx, col_idx = parse_coordinate(row["coordinate"])
+            #     cell_features = preprocess_features(row.drop(non_feature_columns))
+            #     sheet_tensor[row_idx, col_idx, :] = cell_features
+            sheet_tensor = self.process_sheet(group, max_rows, max_cols, self.num_cell_features, non_feature_columns)
             self.hwc_tensors.append(sheet_tensor)
 
             table_ranges = [
                 parse_table_range(tr) for tr in group["table_range"].iloc[0]
             ]
             self.zero_indexed_table_ranges.append(table_ranges)
+
+    def process_sheet(self, group, max_rows, max_cols, num_cell_features, non_feature_columns):
+        sheet_tensor = torch.zeros((max_rows, max_cols, num_cell_features))
+
+        # Extract coordinates
+        coordinates = np.array([parse_coordinate(coord) for coord in group["coordinate"]])
+        row_indices, col_indices = coordinates[:, 0], coordinates[:, 1]
+
+        # Extract and process features
+        feature_matrix = np.stack(group.drop(columns=non_feature_columns).apply(preprocess_features, axis=1).to_numpy())
+
+        # Assign values efficiently
+        sheet_tensor[row_indices, col_indices, :] = torch.tensor(feature_matrix, dtype=sheet_tensor.dtype)
+
+        return sheet_tensor
 
     def _get_max_dimensions(self, group):
         # Compute the max row and column indices for this spreadsheet

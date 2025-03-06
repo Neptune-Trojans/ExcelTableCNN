@@ -1,4 +1,6 @@
 from typing import List, Tuple, Optional
+
+import pandas as pd
 from tqdm import tqdm
 import torch
 from openpyxl.utils.cell import coordinate_to_tuple, range_boundaries
@@ -35,9 +37,7 @@ class DataframeTensors:
 
         # Group by file_path and sheet_name to process each sheet separately
         grouped = dataframe.groupby(["file_path", "sheet_name"])
-        for _, group in tqdm(
-            grouped, total=len(grouped), desc="Creating tensors and labels"
-        ):
+        for _, group in tqdm(grouped, total=len(grouped), desc="Creating tensors and labels"):
             max_rows, max_cols = self._get_max_dimensions(group)
             if self.num_cell_features is None:
                 self.num_cell_features = len(group.columns) - len(non_feature_columns)
@@ -58,9 +58,18 @@ class DataframeTensors:
 
     def _get_max_dimensions(self, group):
         # Compute the max row and column indices for this spreadsheet
-        max_row, max_col = 0, 0
-        for _, row in group.iterrows():
-            row_idx, col_idx = parse_coordinate(row["coordinate"])
-            max_row = max(max_row, row_idx)
-            max_col = max(max_col, col_idx)
+        # max_row, max_col = 0, 0
+        # for _, row in group.iterrows():
+        #     row_idx, col_idx = parse_coordinate(row["coordinate"])
+        #     max_row = max(max_row, row_idx)
+        #     max_col = max(max_col, col_idx)
+
+        # Extract row and column indices using vectorized operations
+        coordinates = group["coordinate"].apply(parse_coordinate)
+
+        # Convert to a DataFrame for efficient max calculation
+        coords_df = pd.DataFrame(coordinates.tolist(), columns=["row_idx", "col_idx"])
+
+        # Get max row and column in one operation
+        max_row, max_col = coords_df.max()
         return max_row + 1, max_col + 1  # Add 1 because indices are zero-based

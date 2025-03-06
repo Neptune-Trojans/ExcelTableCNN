@@ -31,9 +31,9 @@ def get_table_features(file_path, sheet_name) -> pd.DataFrame:
     ws = wb[sheet_name]
 
     # Determine the actual data range
-    min_row = ws.min_row
+    min_row = 1
     max_row = ws.max_row
-    min_col = ws.min_column
+    min_col = 1
     max_col = ws.max_column
 
     data = []

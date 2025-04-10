@@ -24,7 +24,7 @@ def parse_table_range(table_range):
 
 def preprocess_features(row):
     # Convert the pandas Series directly to a tensor
-    return torch.tensor(row.astype(float).values, dtype=torch.float32)
+    return torch.tensor(row.astype(float).values, dtype=torch.float16)
 
 
 class DataframeTensors:
@@ -58,7 +58,7 @@ class DataframeTensors:
             self.zero_indexed_table_ranges.append(table_ranges)
 
     def process_sheet(self, group, max_rows, max_cols, num_cell_features, non_feature_columns):
-        sheet_tensor = torch.zeros((max_rows, max_cols, num_cell_features))
+        sheet_tensor = torch.zeros((max_rows, max_cols, num_cell_features), dtype=torch.float32)
 
         # Extract coordinates
         coordinates = np.array([parse_coordinate(coord) for coord in group["coordinate"]])
@@ -68,7 +68,7 @@ class DataframeTensors:
         feature_matrix = np.stack(group.drop(columns=non_feature_columns).apply(preprocess_features, axis=1).to_numpy())
 
         # Assign values efficiently
-        sheet_tensor[row_indices, col_indices, :] = torch.tensor(feature_matrix, dtype=sheet_tensor.dtype)
+        sheet_tensor[row_indices, col_indices, :] = torch.tensor(feature_matrix, dtype=torch.float32)
 
         return sheet_tensor
 

@@ -44,7 +44,7 @@ if __name__ == '__main__':
     init_dataframe_view()
     # model = get_model(17)
     model = get_model(10)
-    train_df, test_df = get_train_test(args.labels_file, args.data_folder, args.output_folder)
+    # train_df, test_df = get_train_test(args.labels_file, args.data_folder, args.output_folder)
 
     train_df = pd.read_pickle(os.path.join(args.output_folder, "train_features.pkl"))
     test_df = pd.read_pickle(os.path.join(args.output_folder, "test_features.pkl"))
@@ -73,5 +73,5 @@ if __name__ == '__main__':
     optimizer = optim.SGD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=0.0005)
     train_model(model, train_loader, optimizer, args.epochs_number, device)
 
-
+    torch.save(model.state_dict(), os.path.join(args.output_folder, 'weights.pt'))
     evaluate_model(model, test_loader, device)

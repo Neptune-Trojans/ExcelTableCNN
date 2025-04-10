@@ -117,7 +117,7 @@ def evaluate_model(model, test_loader, device, iou_threshold=0.5):
     # Calculate precision and recall
     precision = len(TPs) / (len(TPs) + len(FPs)) if TPs or FPs else 0
     recall = len(TPs) / (len(TPs) + len(FNs)) if TPs or FNs else 0
-
+    print(f'precision: {precision}, recall {recall}')
     # Compute AP as the area under the precision-recall curve
     # This can be more complex in practice. Here's a simple version
     AP = precision * recall

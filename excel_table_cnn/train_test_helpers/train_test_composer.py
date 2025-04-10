@@ -44,8 +44,11 @@ def extract_features(files_df, data_folder_path):
     # Iterate over the unique pairs
     for _, row in tqdm(files_df.iterrows(), total=files_df.shape[0], desc="Extracting features from files"):
         try:
-            file_path = os.path.join(row['parent_path'], row['file_name'])
+            file_path = row['file_path']
             features_df = get_table_features(os.path.join(data_folder_path, file_path), row['sheet_name'])
+            if len(features_df) > 30000:
+                continue
+
             features_df["file_path"] = file_path
             features_df["sheet_name"] = row['sheet_name']
             features_df["set_type"] = row["set_type"]
@@ -88,7 +91,7 @@ def get_train_test(labels_file, data_folder, output_path):
     # dataset_files_converted = convert_files(files_df_sample, data_folder_path)
 
     dataset_files_converted = pd.read_csv(labels_file)
-    dataset_files_converted.rename({'file_folder': 'parent_path', 'table_region': 'table_range', 'split': 'set_type'},
+    dataset_files_converted.rename({ 'table_region': 'table_range', 'split': 'set_type'},
                                    axis=1, inplace=True)
     # data_folder_path = '/Users/arito/Data/TableSense'
     # Getting table features

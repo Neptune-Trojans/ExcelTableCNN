@@ -70,7 +70,7 @@ class DataframeTensors:
         # Assign values efficiently
         sheet_tensor[row_indices, col_indices, :] = torch.tensor(feature_matrix, dtype=torch.float32)
 
-        return sheet_tensor
+        return sheet_tensor[:,:,:10]
 
     def _get_max_dimensions(self, group):
         # Compute the max row and column indices for this spreadsheet

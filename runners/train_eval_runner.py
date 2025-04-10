@@ -42,6 +42,8 @@ if __name__ == '__main__':
 
 
     init_dataframe_view()
+    # model = get_model(17)
+    model = get_model(10)
     #train_df, test_df = get_train_test(args.labels_file, args.data_folder, args.output_folder)
 
     train_df = pd.read_pickle(os.path.join(args.output_folder, "train_features.pkl"))
@@ -65,7 +67,7 @@ if __name__ == '__main__':
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
 
     device = get_device()
-    model = get_model(17)
+
 
 
     optimizer = optim.SGD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=0.0005)

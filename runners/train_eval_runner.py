@@ -37,6 +37,7 @@ if __name__ == '__main__':
     parser.add_argument('--labels_file', type=str, help='file with the labels')
     parser.add_argument('--data_folder', type=str, help='excel files folder')
     parser.add_argument('--output_folder', type=str, help='output folder')
+    parser.add_argument('--epochs_number', type=int, help='number of epochs')
     args = parser.parse_args()
 
 

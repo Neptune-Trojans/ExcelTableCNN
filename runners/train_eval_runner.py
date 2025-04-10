@@ -46,8 +46,8 @@ if __name__ == '__main__':
     model = get_model(10)
     #train_df, test_df = get_train_test(args.labels_file, args.data_folder, args.output_folder)
 
-    train_df = pd.read_pickle(os.path.join(args.output_folder, "train_features.pkl"))
-    test_df = pd.read_pickle(os.path.join(args.output_folder, "test_features.pkl"))
+    train_df = pd.read_pickle(os.path.join(args.output_folder, "train_features.pkl")).head(100)
+    test_df = pd.read_pickle(os.path.join(args.output_folder, "test_features.pkl")).head(100)
 
     train_df['table_range'] = train_df['table_range'].apply(ast.literal_eval)
     test_df['table_range'] = test_df['table_range'].apply(ast.literal_eval)

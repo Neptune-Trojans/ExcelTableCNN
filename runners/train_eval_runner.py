@@ -38,6 +38,7 @@ if __name__ == '__main__':
     parser.add_argument('--data_folder', type=str, help='excel files folder')
     parser.add_argument('--output_folder', type=str, help='output folder')
     parser.add_argument('--epochs_number', type=int, help='number of epochs')
+    parser.add_argument('--batch_size', type=int, help='batch size')
     args = parser.parse_args()
 
 
@@ -62,7 +63,7 @@ if __name__ == '__main__':
     test_dataset = SpreadsheetDataset(test_df)
 
 
-    batch_size = 1  # For different-sized inputs
+    batch_size = args.batch_size  # For different-sized inputs
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
 

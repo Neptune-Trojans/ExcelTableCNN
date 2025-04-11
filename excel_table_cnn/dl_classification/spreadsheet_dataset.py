@@ -10,7 +10,7 @@ def get_bounding_box(table_ranges):
             [min_col, min_row, max_col, max_row]  # x_min, y_min, x_max, y_max
             for min_col, min_row, max_col, max_row in table_ranges
         ],
-        dtype=torch.float16,
+        dtype=torch.float32,
     )
     # Assuming '1' is the label for tables:
     labels = torch.ones((boxes.shape[0],), dtype=torch.int64)

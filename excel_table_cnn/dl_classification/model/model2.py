@@ -50,3 +50,4 @@ if __name__ == '__main__':
     model = MultiChannelRetinaNet(input_channels=12, num_classes=2).to('mps')
     model.train()
     losses = model(images, targets)
+    print(losses)

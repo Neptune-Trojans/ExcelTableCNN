@@ -2,6 +2,9 @@ import torch
 import torch.nn as nn
 from torchvision.models.detection import retinanet_resnet50_fpn
 
+from excel_table_cnn.dl_classification.tensors import DataframeTensors
+from excel_table_cnn.train_test_helpers import get_table_features
+
 
 class MultiChannelRetinaNet(nn.Module):
     def __init__(self, input_channels: int = 12, num_classes: int = 91, pretrained=True):
@@ -24,26 +27,26 @@ class MultiChannelRetinaNet(nn.Module):
             padding=1
         )
 
-    def forward(self, x, targets=None):
-        x = self.channel_mapper(x)  # Convert to 3 channels
+    def forward(self, images, targets=None):
+        # images: List[Tensor] with shape [C, H, W] each
+        processed = [self.channel_mapper(img.unsqueeze(0)).squeeze(0) for img in images]
         if self.training:
-            return self.detector(x, targets)
+            return self.detector(processed, targets)
         else:
-            return self.detector(x)
+            return self.detector(processed)
 
 
 
 if __name__ == '__main__':
     # Works fine
 
-    img = torch.randn(1, 12, 20000, 800)  # 640x480
+    images = [torch.randn(12, 512, 512, device='mps')]
 
-    model = MultiChannelRetinaNet(input_channels=12, num_classes=2, pretrained=False)
-    model.eval()
+    targets = [{
+        'boxes': torch.tensor([[0., 0., 27., 13.]], dtype=torch.float32, device='mps'),
+        'labels': torch.tensor([1], dtype=torch.int64, device='mps')
+    }]
 
-
-    # Run inference
-    with torch.no_grad():
-        outputs = model(img)
-
-    print(outputs)
+    model = MultiChannelRetinaNet(input_channels=12, num_classes=2).to('mps')
+    model.train()
+    losses = model(images, targets)

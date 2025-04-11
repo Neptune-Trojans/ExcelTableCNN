@@ -38,7 +38,7 @@ def train_model(model, train_loader, optimizer, num_epochs, device):
 
             # Forward pass
             loss_dict = model(images, targets)
-            print(loss_dict)
+
             losses = sum(loss for loss in loss_dict.values())
 
             epoch_loss += losses.item()

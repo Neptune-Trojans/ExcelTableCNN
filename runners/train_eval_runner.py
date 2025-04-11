@@ -39,6 +39,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_folder', type=str, help='output folder')
     parser.add_argument('--epochs_number', type=int, help='number of epochs')
     parser.add_argument('--batch_size', type=int, help='batch size')
+    parser.add_argument('--learning_rate', type=float, default=1e-5, help='batch size')
     args = parser.parse_args()
 
 
@@ -71,7 +72,7 @@ if __name__ == '__main__':
 
 
 
-    optimizer = optim.SGD(model.parameters(), lr=1e-5, momentum=0.9, weight_decay=0.0005)
+    optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=0.9, weight_decay=0.0005)
     train_model(model, train_loader, optimizer, args.epochs_number, device)
 
     torch.save(model.state_dict(), os.path.join(args.output_folder, 'weights.pt'))

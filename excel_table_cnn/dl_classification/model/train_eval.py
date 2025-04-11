@@ -3,10 +3,12 @@ from torch.utils.data import DataLoader
 from collections import defaultdict
 
 from .model import TableDetectionModel
+from .model2 import MultiChannelRetinaNet
 
 
-def get_model(num_classes=2):
-    model = TableDetectionModel(num_classes)
+def get_model(in_channels=2):
+    # model = TableDetectionModel(in_channels)
+    model = MultiChannelRetinaNet(input_channels=in_channels, num_classes=2, pretrained=False)
     return model
 
 

@@ -40,6 +40,7 @@ def train_model(model, train_loader, optimizer, num_epochs, device):
             loss_dict = model(images, targets)
 
             losses = sum(loss for loss in loss_dict.values())
+            print(losses)
             epoch_loss += losses.item()
 
             # Backpropagation

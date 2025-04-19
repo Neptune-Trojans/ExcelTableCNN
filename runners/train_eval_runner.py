@@ -40,6 +40,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs_number', type=int, help='number of epochs')
     parser.add_argument('--batch_size', type=int, help='batch size')
     parser.add_argument('--learning_rate', type=float, default=1e-5, help='batch size')
+    parser.add_argument('--template_path', type=str, help='batch size')
     args = parser.parse_args()
 
 

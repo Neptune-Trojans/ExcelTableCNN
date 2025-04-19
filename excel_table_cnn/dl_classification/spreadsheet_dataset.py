@@ -116,8 +116,8 @@ class SpreadsheetDataset(Dataset):
         H, W = self._pairs[idx]
         tensor = torch.zeros(H, W, 10)
         locations = self.tile_matrix_randomly(tensor, self.example_features)
-
-        labels = {'boxes': torch.tensor(locations, dtype=torch.float32), 'labels': torch.tensor([1], dtype=torch.int64)}
+        box_classes = [1]* len(locations)
+        labels = {'boxes': torch.tensor(locations, dtype=torch.float32), 'labels': torch.tensor(box_classes, dtype=torch.int64)}
 
         #tensor = self.tensors.hwc_tensors[idx]
         # Permute tensor to C x H x W

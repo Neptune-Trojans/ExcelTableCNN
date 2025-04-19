@@ -73,31 +73,51 @@ class SpreadsheetDataset(Dataset):
             if a * b < limit:
                 return [a, b]
 
-    def assign_matrix_randomly(self, spreadsheet_map, matrix):
-        H, W, _ = spreadsheet_map.shape
-        h, w, _ = matrix.shape
+    # def assign_matrix_randomly(self, spreadsheet_map, matrix):
+    #     H, W, _ = spreadsheet_map.shape
+    #     h, w, _ = matrix.shape
+    #
+    #     # Choose a random top-left location (x1, y1)
+    #     y1 = random.randint(0, H - h)
+    #     x1 = random.randint(0, W - w)
+    #     x2 = x1 + w
+    #     y2 = y1 + h
+    #
+    #     # Assign matrix to that location
+    #     spreadsheet_map[y1:y2, x1:x2, :] = matrix
+    #
+    #     return x1, y1, x2, y2
 
-        if h > H or w > W:
-            raise ValueError("Matrix is larger than the map in one or more dimensions.")
+    def tile_matrix_randomly(self, map_tensor, tile, max_tiles=10, max_attempts=30):
+        H, W, C = map_tensor.shape
+        h, w, _ = tile.shape
+        n_tiles = random.randint(1, max_tiles)
 
-        # Choose a random top-left location (x1, y1)
-        y1 = random.randint(0, H - h)
-        x1 = random.randint(0, W - w)
-        x2 = x1 + w
-        y2 = y1 + h
+        locations = []
+        attempts = 0
 
-        # Assign matrix to that location
-        spreadsheet_map[y1:y2, x1:x2, :] = matrix
+        while len(locations) < n_tiles and attempts < max_attempts:
+            y1 = random.randint(0, H - h)
+            x1 = random.randint(0, W - w)
+            y2 = y1 + h
+            x2 = x1 + w
 
-        return x1, y1, x2, y2
+            # Check if area is untiled (all zeros)
+            if torch.all(map_tensor[y1:y2, x1:x2, :] == 0):
+                map_tensor[y1:y2, x1:x2, :] = tile
+                locations.append((x1, y1, x2, y2))
+
+            attempts += 1
+
+        return locations
 
     def __getitem__(self, idx):
 
         H, W = self._pairs[idx]
         tensor = torch.zeros(H, W, 10)
-        x1, y1, x2, y2 = self.assign_matrix_randomly(tensor, self.example_features)
+        locations = self.tile_matrix_randomly(tensor, self.example_features)
 
-        labels = {'boxes': torch.tensor([[ x1, y1, x2, y2]], dtype=torch.float32), 'labels': torch.tensor([1], dtype=torch.int64)}
+        labels = {'boxes': torch.tensor(locations, dtype=torch.float32), 'labels': torch.tensor([1], dtype=torch.int64)}
 
         #tensor = self.tensors.hwc_tensors[idx]
         # Permute tensor to C x H x W

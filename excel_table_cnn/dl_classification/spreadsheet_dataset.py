@@ -81,13 +81,13 @@ class SpreadsheetDataset(Dataset):
             raise ValueError("Matrix is larger than the map in one or more dimensions.")
 
         # Choose a random top-left location (x1, y1)
-        x1 = random.randint(0, H - h)
-        y1 = random.randint(0, W - w)
-        x2 = x1 + h
-        y2 = y1 + w
+        y1 = random.randint(0, H - h)
+        x1 = random.randint(0, W - w)
+        x2 = x1 + w
+        y2 = y1 + h
 
         # Assign matrix to that location
-        spreadsheet_map[x1:x2, y1:y2, :] = matrix
+        spreadsheet_map[y1:y2, x1:x2, :] = matrix
 
         return x1, y1, x2, y2
 
@@ -96,7 +96,7 @@ class SpreadsheetDataset(Dataset):
         H, W = self._pairs[idx]
         tensor = torch.zeros(H, W, 10)
         x1, y1, x2, y2 = self.assign_matrix_randomly(tensor, self.example_features)
-        x1, y1, x2, y2 = 11 ,22, 33, 44
+
         labels = {'boxes': torch.tensor([[ x1, y1, x2, y2]], dtype=torch.float32), 'labels': torch.tensor([1], dtype=torch.int64)}
 
         #tensor = self.tensors.hwc_tensors[idx]

@@ -59,8 +59,8 @@ if __name__ == '__main__':
     #test_df = DataframeTensors(test_df)
 
 
-    train_dataset = SpreadsheetDataset(None)
-    test_dataset = SpreadsheetDataset(None)
+    train_dataset = SpreadsheetDataset(args.template_path)
+    test_dataset = SpreadsheetDataset(args.template_path)
 
 
     batch_size = args.batch_size  # For different-sized inputs

@@ -42,18 +42,18 @@ def get_bounding_box(table_ranges):
 
 
 class SpreadsheetDataset(Dataset):
-    def __init__(self, tensors: DataframeTensors):
+    def __init__(self, template_path: str):
         # self.tensors = tensors
         # self.num_cell_features = tensors.num_cell_features
 
         self._epoch_iterations = 1000
         self._pairs = [self.generate_valid_pair() for _ in range(1000)]
-        self.example_features = self.get_example_features()
+        self.example_features = self.get_example_features(template_path)
 
 
 
-    def get_example_features(self):
-        features_df = get_table_features('2231.xlsx', 'Sheet1')
+    def get_example_features(self, template_path):
+        features_df = get_table_features(template_path, 'Sheet1')
         features_df['file_path'] = '2231.xlsx'
         features_df['sheet_name'] ='Sheet1'
         features_df['table_range'] = [["A2:K7"]] * len(features_df)

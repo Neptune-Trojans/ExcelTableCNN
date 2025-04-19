@@ -96,6 +96,7 @@ class SpreadsheetDataset(Dataset):
         H, W = self._pairs[idx]
         tensor = torch.zeros(H, W, 10)
         x1, y1, x2, y2 = self.assign_matrix_randomly(tensor, self.example_features)
+        x1, y1, x2, y2 = 11 ,22, 33, 44
         labels = {'boxes': torch.tensor([[ x1, y1, x2, y2]], dtype=torch.float32), 'labels': torch.tensor([1], dtype=torch.int64)}
 
         #tensor = self.tensors.hwc_tensors[idx]

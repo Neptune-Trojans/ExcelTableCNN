@@ -53,7 +53,7 @@ class SpreadsheetDataset(Dataset):
 
 
     def get_example_features(self):
-        features_df = get_table_features('../excel_table_cnn/dl_classification/2231.xlsx', 'Sheet1')
+        features_df = get_table_features('2231.xlsx', 'Sheet1')
         features_df['file_path'] = '2231.xlsx'
         features_df['sheet_name'] ='Sheet1'
         features_df['table_range'] = [["A2:K7"]] * len(features_df)

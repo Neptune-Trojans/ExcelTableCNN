@@ -48,20 +48,19 @@ if __name__ == '__main__':
     model = get_model(10)
     # train_df, test_df = get_train_test(args.labels_file, args.data_folder, args.output_folder)
 
-    train_df = pd.read_pickle(os.path.join(args.output_folder, "train_features.pkl"))
-    test_df = pd.read_pickle(os.path.join(args.output_folder, "test_features.pkl"))
+    #train_df = pd.read_pickle(os.path.join(args.output_folder, "train_features.pkl"))
+    #test_df = pd.read_pickle(os.path.join(args.output_folder, "test_features.pkl"))
 
-    train_df['table_range'] = train_df['table_range'].apply(ast.literal_eval)
-    test_df['table_range'] = test_df['table_range'].apply(ast.literal_eval)
-
-
-    train_df = DataframeTensors(train_df)
-    test_df = DataframeTensors(test_df)
+    #train_df['table_range'] = train_df['table_range'].apply(ast.literal_eval)
+    #test_df['table_range'] = test_df['table_range'].apply(ast.literal_eval)
 
 
+    #train_df = DataframeTensors(train_df)
+    #test_df = DataframeTensors(test_df)
 
-    train_dataset = SpreadsheetDataset(train_df)
-    test_dataset = SpreadsheetDataset(test_df)
+
+    train_dataset = SpreadsheetDataset(None)
+    test_dataset = SpreadsheetDataset(None)
 
 
     batch_size = args.batch_size  # For different-sized inputs

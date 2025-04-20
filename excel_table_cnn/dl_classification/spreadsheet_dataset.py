@@ -93,8 +93,12 @@ class SpreadsheetDataset(Dataset):
 
         n_tiles = random.randint(1, max_tiles)
 
+        # Initialize ID map to track which tile occupies each location
+        id_map = torch.zeros(H, W, dtype=torch.long)
+
         locations = []
         attempts = 0
+        tile_id = 1  # Start tile IDs from 1
 
         while len(locations) < n_tiles and attempts < max_attempts:
             h, w, _ = tile.shape
@@ -109,9 +113,11 @@ class SpreadsheetDataset(Dataset):
             x2 = x1 + w1
 
             # Check if area is untiled (all zeros)
-            if torch.all(map_tensor[y1:y2, x1:x2, :] == 0):
+            if torch.all(id_map[y1:y2, x1:x2] == 0):
                 map_tensor[y1:y2, x1:x2, :] = new_tile
                 locations.append((x1, y1, x2, y2))
+                id_map[y1:y2, x1:x2] = tile_id  # Assign tile ID
+                tile_id += 1
 
             attempts += 1
 
@@ -141,7 +147,9 @@ class SpreadsheetDataset(Dataset):
     def __getitem__(self, idx):
 
         H, W = self._pairs[idx]
-        tensor = torch.randint(0, 2, (H, W, 10))
+        #tensor = torch.zeros(H, W, 10)
+        tensor = torch.randint(0, 2, (H, W, 10), dtype=torch.float32)
+
         locations = self.tile_matrix_randomly(tensor, self.example_features)
         box_classes = [1]* len(locations)
         labels = {'boxes': torch.tensor(locations, dtype=torch.float32), 'labels': torch.tensor(box_classes, dtype=torch.int64)}

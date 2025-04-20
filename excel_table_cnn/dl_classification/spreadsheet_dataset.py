@@ -88,7 +88,7 @@ class SpreadsheetDataset(Dataset):
     #
     #     return x1, y1, x2, y2
 
-    def tile_matrix_randomly(self, map_tensor, tile, max_tiles=10, max_attempts=30):
+    def tile_matrix_randomly(self, map_tensor, tile, max_tiles=10, max_attempts=50):
         H, W, C = map_tensor.shape
 
         n_tiles = random.randint(1, max_tiles)

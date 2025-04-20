@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
 
     optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=0.9, weight_decay=0.0001)
-    scheduler = MultiStepLR(optimizer, milestones=[10, 20], gamma=0.1)
+    scheduler = MultiStepLR(optimizer, milestones=[10, 20, 40], gamma=0.1)
     train_model(model, train_loader, optimizer,scheduler, args.epochs_number, device)
 
     torch.save(model.state_dict(), os.path.join(args.output_folder, 'weights.pt'))

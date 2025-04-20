@@ -22,7 +22,7 @@ def get_dataloader(dataset):
     return loader
 
 
-def train_model(model, train_loader, optimizer, num_epochs, device):
+def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
     # Send the model to the device (GPU or CPU)
     model.to(device)
 
@@ -62,7 +62,10 @@ def train_model(model, train_loader, optimizer, num_epochs, device):
             losses.backward()
             optimizer.step()
 
-        print(f"Epoch {epoch}: Loss: {epoch_loss / len(train_loader)}")
+        # Step the scheduler at the end of each epoch
+        scheduler.step()
+
+        print(f"Epoch {epoch}: Loss: {epoch_loss / len(train_loader)} lr: {scheduler.get_last_lr():.6f}")
 
 
 def calculate_iou(pred_box, gt_box):

@@ -90,26 +90,53 @@ class SpreadsheetDataset(Dataset):
 
     def tile_matrix_randomly(self, map_tensor, tile, max_tiles=10, max_attempts=30):
         H, W, C = map_tensor.shape
-        h, w, _ = tile.shape
+
         n_tiles = random.randint(1, max_tiles)
 
         locations = []
         attempts = 0
 
         while len(locations) < n_tiles and attempts < max_attempts:
-            y1 = random.randint(0, H - h)
-            x1 = random.randint(0, W - w)
-            y2 = y1 + h
-            x2 = x1 + w
+            h, w, _ = tile.shape
+            h1 = random.randint(h, H)
+            w1 = random.randint(w, W)
+
+            new_tile = self.resize_with_row_col_copy(tile, h1, w1)
+
+            y1 = random.randint(0, H - h1)
+            x1 = random.randint(0, W - w1)
+            y2 = y1 + h1
+            x2 = x1 + w1
 
             # Check if area is untiled (all zeros)
             if torch.all(map_tensor[y1:y2, x1:x2, :] == 0):
-                map_tensor[y1:y2, x1:x2, :] = tile
+                map_tensor[y1:y2, x1:x2, :] = new_tile
                 locations.append((x1, y1, x2, y2))
 
             attempts += 1
 
         return locations
+
+    def resize_with_row_col_copy(self, matrix, h1, w1):
+        h, w, c = matrix.shape
+
+        new_matrix = torch.zeros(h1, w1, 10)
+        # Start with trimmed or same-size version
+        new_matrix[:h, :w,  :] = matrix
+
+        # If we need more rows
+        if h1 > h:
+            last_row = matrix[h - 1:h, :, :]  # shape: (1, w1, c)
+            extra_rows = last_row.repeat(h1 - h, 1, 1)  # repeat rows
+            new_matrix[h:h1, :w, :] = extra_rows
+
+        # If we need more columns
+        if w1 > w:
+            last_col = new_matrix[:, w - 1:w, :]  # shape: (h1, 1, c)
+            extra_cols = last_col.repeat(1, w1 - w, 1)  # repeat columns
+            new_matrix[:, w:w1, :] = extra_cols
+
+        return new_matrix
 
     def __getitem__(self, idx):
 

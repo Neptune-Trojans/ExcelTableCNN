@@ -65,7 +65,7 @@ def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
         # Step the scheduler at the end of each epoch
         scheduler.step()
 
-        print(f"Epoch {epoch}: Loss: {epoch_loss / len(train_loader)} lr: {scheduler.get_last_lr()}")
+        print(f"Epoch {epoch}: Loss: {epoch_loss / len(train_loader)} lr: {scheduler.get_last_lr()[0]}")
 
 
 def calculate_iou(pred_box, gt_box):

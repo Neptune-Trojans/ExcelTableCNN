@@ -126,7 +126,7 @@ class SpreadsheetDataset(Dataset):
     def resize_with_row_col_copy(self, matrix, h1, w1):
         h, w, c = matrix.shape
 
-        new_matrix = torch.zeros(h1, w1, 10)
+        new_matrix = torch.zeros(h1, w1, 17)
         # Start with trimmed or same-size version
         new_matrix[:h, :w,  :] = matrix
 
@@ -148,7 +148,7 @@ class SpreadsheetDataset(Dataset):
 
         H, W = self._pairs[idx]
         #tensor = torch.zeros(H, W, 10)
-        tensor = torch.randint(0, 2, (H, W, 10), dtype=torch.float32)
+        tensor = torch.randint(0, 2, (H, W, 17), dtype=torch.float32)
 
         locations = self.tile_matrix_randomly(tensor, self.example_features)
         box_classes = [1]* len(locations)

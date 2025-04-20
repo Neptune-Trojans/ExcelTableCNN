@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
 
 
-    optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=0.9, weight_decay=0.0005)
+    optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=0.9, weight_decay=0.0001)
     train_model(model, train_loader, optimizer, args.epochs_number, device)
 
     torch.save(model.state_dict(), os.path.join(args.output_folder, 'weights.pt'))

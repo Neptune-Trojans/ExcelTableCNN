@@ -147,8 +147,8 @@ class SpreadsheetDataset(Dataset):
     def __getitem__(self, idx):
 
         H, W = self._pairs[idx]
-        #tensor = torch.zeros(H, W, 10)
-        tensor = torch.randint(0, 2, (H, W, 17), dtype=torch.float32)
+        tensor = torch.zeros(H, W, 17)
+        tensor[:, :, 0] = 1.0
 
         locations = self.tile_matrix_randomly(tensor, self.example_features)
         box_classes = [1]* len(locations)

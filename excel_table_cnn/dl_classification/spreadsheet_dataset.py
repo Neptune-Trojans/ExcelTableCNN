@@ -100,7 +100,7 @@ class SpreadsheetDataset(Dataset):
         attempts = 0
         tile_id = 1  # Start tile IDs from 1
 
-        while len(locations) < n_tiles and attempts < max_attempts:
+        while len(locations) < max_tiles and attempts < max_attempts:
             h, w, _ = tile.shape
             h1 = random.randint(h, H)
             w1 = random.randint(w, W)

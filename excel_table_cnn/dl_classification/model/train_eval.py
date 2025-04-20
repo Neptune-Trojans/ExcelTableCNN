@@ -4,11 +4,13 @@ from collections import defaultdict
 
 from .model import TableDetectionModel
 from .model2 import MultiChannelRetinaNet
+from .model3 import FasterRCNNMobileNetMapped
 
 
 def get_model(in_channels=2):
     # model = TableDetectionModel(in_channels)
-    model = MultiChannelRetinaNet(input_channels=in_channels, num_classes=2, pretrained=False)
+    #model = MultiChannelRetinaNet(input_channels=in_channels, num_classes=2, pretrained=False)
+    model = FasterRCNNMobileNetMapped(input_channels=in_channels, num_classes=2)
     return model
 
 

@@ -4,9 +4,10 @@ import random
 
 
 class SpreadsheetDataset(Dataset):
-    def __init__(self, feature_maps: list):
+    def __init__(self, feature_maps: list, device):
         # self.tensors = tensors
         # self.num_cell_features = tensors.num_cell_features
+        self._device = device
 
         self._epoch_iterations = 1000
 
@@ -36,7 +37,7 @@ class SpreadsheetDataset(Dataset):
 
 
         # Initialize ID map to track which tile occupies each location
-        id_map = torch.zeros(H, W, dtype=torch.long)
+        id_map = torch.zeros(H, W, dtype=torch.long, device=self._device)
 
         locations = []
         attempts = 0
@@ -70,7 +71,7 @@ class SpreadsheetDataset(Dataset):
     def resize_with_row_col_copy(self, matrix, h1, w1):
         h, w, c = matrix.shape
 
-        new_matrix = torch.zeros(h1, w1, 17)
+        new_matrix = torch.zeros(h1, w1, 17, device=self._device)
         # Start with trimmed or same-size version
         new_matrix[:h, :w,  :] = matrix
 
@@ -91,7 +92,7 @@ class SpreadsheetDataset(Dataset):
     def __getitem__(self, idx):
 
         H, W = self._pairs[idx]
-        tensor = torch.zeros(H, W, 17)
+        tensor = torch.zeros(H, W, 17, device=self._device)
         tensor[:, :, 0] = 1.0
 
         locations = self.tile_matrix_randomly(tensor)

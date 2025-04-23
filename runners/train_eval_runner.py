@@ -76,17 +76,17 @@ if __name__ == '__main__':
             features_map = get_table_features2(file_path, sheet_name, table_area)
             feature_maps.append(features_map)
 
+    device = get_device()
 
-
-    train_dataset = SpreadsheetDataset(feature_maps)
-    test_dataset = SpreadsheetDataset(feature_maps)
+    train_dataset = SpreadsheetDataset(feature_maps, device)
+    test_dataset = SpreadsheetDataset(feature_maps, device)
 
 
     batch_size = args.batch_size  # For different-sized inputs
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
 
-    device = get_device()
+
 
 
     optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=0.9, weight_decay=0.0001)

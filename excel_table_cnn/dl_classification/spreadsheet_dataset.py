@@ -49,8 +49,8 @@ class SpreadsheetDataset(Dataset):
         self._epoch_iterations = 1000
 
         self._feature_maps = feature_maps
-        self._h_min = min(tensor.shape[0] for tensor in feature_maps)
-        self._w_min = min(tensor.shape[1] for tensor in feature_maps)
+        self._h_min = max(tensor.shape[0] for tensor in feature_maps)
+        self._w_min = max(tensor.shape[1] for tensor in feature_maps)
         #self.example_features = self.get_example_features(template_path)
 
 
@@ -72,8 +72,8 @@ class SpreadsheetDataset(Dataset):
     def generate_valid_pair(self):
 
         while True:
-            H = random.randint(self._h_min + 2, 1000)
-            W = random.randint(self._w_min + 2, 1000)
+            H = random.randint(self._h_min + 1, 1000)
+            W = random.randint(self._w_min + 1, 1000)
             if H * W < 30000:
                 return H, W
 

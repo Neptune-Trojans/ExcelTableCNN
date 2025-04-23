@@ -64,7 +64,7 @@ class SpreadsheetDataset(Dataset):
 
     def __len__(self):
         # The length of the dataset is the number of spreadsheets
-        return len(self._pairs)
+        return self._epoch_iterations
 
     @staticmethod
     def generate_valid_pair(tile):
@@ -148,7 +148,7 @@ class SpreadsheetDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        
+
         featuremap_idx = random.randint(0, len(self._feature_maps))
         tile = self._feature_maps[featuremap_idx]
         H, W = self.generate_valid_pair(tile)

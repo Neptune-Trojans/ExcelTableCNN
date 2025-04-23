@@ -149,7 +149,7 @@ class SpreadsheetDataset(Dataset):
     def __getitem__(self, idx):
 
 
-        featuremap_idx = random.randint(0, len(self._feature_maps))
+        featuremap_idx = random.randint(0, len(self._feature_maps) - 1)
         tile = self._feature_maps[featuremap_idx]
         H, W = self.generate_valid_pair(tile)
 

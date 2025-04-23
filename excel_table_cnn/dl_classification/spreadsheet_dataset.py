@@ -47,7 +47,7 @@ class SpreadsheetDataset(Dataset):
         # self.num_cell_features = tensors.num_cell_features
 
         self._epoch_iterations = 1000
-        self._pairs = [self.generate_valid_pair() for _ in range(1000)]
+
         self._feature_maps = feature_maps
         #self.example_features = self.get_example_features(template_path)
 
@@ -67,15 +67,16 @@ class SpreadsheetDataset(Dataset):
         return len(self._pairs)
 
     @staticmethod
-    def generate_valid_pair(limit=30000):
+    def generate_valid_pair(tile):
+        h, w, _ = tile.shape
         while True:
-            a = random.randint(100, limit // 100)
-            b = random.randint(100, limit // 100)
-            if a * b < limit:
-                return [a, b]
+            H = random.randint(h, 1000)
+            W = random.randint(w, 1000)
+            if H * W < 30000:
+                return H, W
 
     # def assign_matrix_randomly(self, spreadsheet_map, matrix):
-    #     H, W, _ = spreadsheet_map.shape
+    #
     #     h, w, _ = matrix.shape
     #
     #     # Choose a random top-left location (x1, y1)
@@ -147,11 +148,13 @@ class SpreadsheetDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        H, W = self._pairs[idx]
-        tensor = torch.zeros(H, W, 17)
-        tensor[:, :, 0] = 1.0
+        
         featuremap_idx = random.randint(0, len(self._feature_maps))
         tile = self._feature_maps[featuremap_idx]
+        H, W = self.generate_valid_pair(tile)
+
+        tensor = torch.zeros(H, W, 17)
+        tensor[:, :, 0] = 1.0
 
         locations = self.tile_matrix_randomly(tensor, tile)
         box_classes = [1]* len(locations)

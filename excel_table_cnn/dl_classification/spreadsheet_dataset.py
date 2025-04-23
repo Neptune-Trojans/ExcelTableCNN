@@ -11,20 +11,11 @@ class SpreadsheetDataset(Dataset):
         self._epoch_iterations = 1000
 
         self._feature_maps = feature_maps
+        self._feature_maps_shapes = [tensor.shape for tensor in feature_maps]
         self._h_max = max(tensor.shape[0] for tensor in feature_maps)
         self._w_max = max(tensor.shape[1] for tensor in feature_maps)
+
         self._pairs = [self._generate_valid_pairs() for _ in range(1000)]
-        #self.example_features = self.get_example_features(template_path)
-
-
-
-    # def get_example_features(self, template_path):
-    #     features_df = get_table_features(template_path, 'Sheet1')
-    #     features_df['file_path'] = '2231.xlsx'
-    #     features_df['sheet_name'] ='Sheet1'
-    #     features_df['table_range'] = [["A2:K7"]] * len(features_df)
-    #     features_df = DataframeTensors(features_df)
-    #     return features_df.hwc_tensors[0][1:]
 
 
     def __len__(self):
@@ -54,7 +45,7 @@ class SpreadsheetDataset(Dataset):
         while len(locations) < max_tiles and attempts < max_attempts:
             tile_idx = random.randint(0, len(self._feature_maps) - 1)
             tile = self._feature_maps[tile_idx]
-            h, w, _ = tile.shape
+            h, w, _ = self._feature_maps_shapes[tile_idx]
             h1 = random.randint(h, H)
             w1 = random.randint(w, W)
 
@@ -110,10 +101,5 @@ class SpreadsheetDataset(Dataset):
         #tensor = self.tensors.hwc_tensors[idx]
         # Permute tensor to C x H x W
         tensor = tensor.permute(2, 0, 1)
-
-        # Get labels
-        #labels = get_bounding_box(self.tensors.zero_indexed_table_ranges[idx])
-
-
 
         return tensor, labels

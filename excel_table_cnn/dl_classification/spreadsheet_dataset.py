@@ -72,8 +72,8 @@ class SpreadsheetDataset(Dataset):
     def generate_valid_pair(self):
 
         while True:
-            H = random.randint(self._h_min + 1, 1000)
-            W = random.randint(self._w_min + 1, 1000)
+            H = random.randint(self._h_min + 2, 1000)
+            W = random.randint(self._w_min + 2, 1000)
             if H * W < 30000:
                 return H, W
 
@@ -135,9 +135,6 @@ class SpreadsheetDataset(Dataset):
         return new_matrix
 
     def __getitem__(self, idx):
-
-
-
 
         H, W = self.generate_valid_pair()
 

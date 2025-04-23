@@ -25,12 +25,10 @@ class SpreadsheetDataset(Dataset):
 
 
     def _generate_valid_pairs(self):
+            H = self._h_max
+            W = self._w_max
 
-        while True:
-            H = random.randint(self._h_max + 1, 1000)
-            W = random.randint(self._w_max + 1, 1000)
-            if H * W < 30000:
-                return H, W
+            return H, W
 
     def tile_matrix_randomly(self, map_tensor, max_tiles=10, max_attempts=50):
         H, W, C = map_tensor.shape
@@ -97,7 +95,9 @@ class SpreadsheetDataset(Dataset):
 
         locations = self.tile_matrix_randomly(tensor)
         box_classes = [1]* len(locations)
-        labels = {'boxes': torch.tensor(locations, dtype=torch.float32), 'labels': torch.tensor(box_classes, dtype=torch.int64)}
+
+        labels = {'boxes': torch.tensor(locations, dtype=torch.float32, device=self._device),
+                  'labels': torch.tensor(box_classes, dtype=torch.int64, device=self._device)}
 
         #tensor = self.tensors.hwc_tensors[idx]
         # Permute tensor to C x H x W

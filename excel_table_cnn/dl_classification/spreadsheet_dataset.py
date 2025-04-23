@@ -49,6 +49,8 @@ class SpreadsheetDataset(Dataset):
         self._epoch_iterations = 1000
 
         self._feature_maps = feature_maps
+        self._h_min = min(tensor.shape[0] for tensor in feature_maps)
+        self._w_min = min(tensor.shape[1] for tensor in feature_maps)
         #self.example_features = self.get_example_features(template_path)
 
 
@@ -66,34 +68,18 @@ class SpreadsheetDataset(Dataset):
         # The length of the dataset is the number of spreadsheets
         return self._epoch_iterations
 
-    @staticmethod
-    def generate_valid_pair(tile):
-        h, w, _ = tile.shape
+
+    def generate_valid_pair(self):
+
         while True:
-            H = random.randint(h, 1000)
-            W = random.randint(w, 1000)
+            H = random.randint(self._h_min, 1000)
+            W = random.randint(self._w_min, 1000)
             if H * W < 30000:
                 return H, W
 
-    # def assign_matrix_randomly(self, spreadsheet_map, matrix):
-    #
-    #     h, w, _ = matrix.shape
-    #
-    #     # Choose a random top-left location (x1, y1)
-    #     y1 = random.randint(0, H - h)
-    #     x1 = random.randint(0, W - w)
-    #     x2 = x1 + w
-    #     y2 = y1 + h
-    #
-    #     # Assign matrix to that location
-    #     spreadsheet_map[y1:y2, x1:x2, :] = matrix
-    #
-    #     return x1, y1, x2, y2
-
-    def tile_matrix_randomly(self, map_tensor, tile, max_tiles=10, max_attempts=50):
+    def tile_matrix_randomly(self, map_tensor, max_tiles=10, max_attempts=50):
         H, W, C = map_tensor.shape
 
-        n_tiles = random.randint(1, max_tiles)
 
         # Initialize ID map to track which tile occupies each location
         id_map = torch.zeros(H, W, dtype=torch.long)
@@ -103,6 +89,8 @@ class SpreadsheetDataset(Dataset):
         tile_id = 1  # Start tile IDs from 1
 
         while len(locations) < max_tiles and attempts < max_attempts:
+            tile_idx = random.randint(0, len(self._feature_maps) - 1)
+            tile = self._feature_maps[tile_idx]
             h, w, _ = tile.shape
             h1 = random.randint(h, H)
             w1 = random.randint(w, W)
@@ -149,14 +137,14 @@ class SpreadsheetDataset(Dataset):
     def __getitem__(self, idx):
 
 
-        featuremap_idx = random.randint(0, len(self._feature_maps) - 1)
-        tile = self._feature_maps[featuremap_idx]
-        H, W = self.generate_valid_pair(tile)
+
+
+        H, W = self.generate_valid_pair()
 
         tensor = torch.zeros(H, W, 17)
         tensor[:, :, 0] = 1.0
 
-        locations = self.tile_matrix_randomly(tensor, tile)
+        locations = self.tile_matrix_randomly(tensor)
         box_classes = [1]* len(locations)
         labels = {'boxes': torch.tensor(locations, dtype=torch.float32), 'labels': torch.tensor(box_classes, dtype=torch.int64)}
 

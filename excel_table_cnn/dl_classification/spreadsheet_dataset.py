@@ -47,10 +47,10 @@ class SpreadsheetDataset(Dataset):
         # self.num_cell_features = tensors.num_cell_features
 
         self._epoch_iterations = 1000
-
+        self._pairs = [self._generate_valid_pairs() for _ in range(1000)]
         self._feature_maps = feature_maps
-        self._h_min = max(tensor.shape[0] for tensor in feature_maps)
-        self._w_min = max(tensor.shape[1] for tensor in feature_maps)
+        self._h_max = max(tensor.shape[0] for tensor in feature_maps)
+        self._w_max = max(tensor.shape[1] for tensor in feature_maps)
         #self.example_features = self.get_example_features(template_path)
 
 
@@ -69,7 +69,7 @@ class SpreadsheetDataset(Dataset):
         return self._epoch_iterations
 
 
-    def generate_valid_pair(self):
+    def _generate_valid_pairs(self):
 
         while True:
             H = random.randint(self._h_min + 1, 1000)
@@ -136,8 +136,7 @@ class SpreadsheetDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        H, W = self.generate_valid_pair()
-
+        H, W = self._pairs[idx]
         tensor = torch.zeros(H, W, 17)
         tensor[:, :, 0] = 1.0
 

@@ -4,6 +4,7 @@ import os
 
 import pandas as pd
 import torch
+from openpyxl.utils import range_boundaries
 from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
 import torch.optim as optim
@@ -11,6 +12,8 @@ import torch.optim as optim
 from excel_table_cnn.dl_classification.model.train_eval import get_model, train_model, evaluate_model
 from excel_table_cnn.dl_classification.spreadsheet_dataset import SpreadsheetDataset
 from excel_table_cnn.dl_classification.tensors import DataframeTensors
+from excel_table_cnn.train_test_helpers import get_table_features
+from excel_table_cnn.train_test_helpers.cell_features import get_table_features2
 from excel_table_cnn.train_test_helpers.train_test_composer import get_train_test
 
 data_folder_path = 'data'
@@ -37,6 +40,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Do all the things')
     parser.add_argument('--labels_file', type=str, help='file with the labels')
     parser.add_argument('--data_folder', type=str, help='excel files folder')
+
     parser.add_argument('--output_folder', type=str, help='output folder')
     parser.add_argument('--epochs_number', type=int, help='number of epochs')
     parser.add_argument('--batch_size', type=int, help='batch size')
@@ -60,9 +64,22 @@ if __name__ == '__main__':
     #train_df = DataframeTensors(train_df)
     #test_df = DataframeTensors(test_df)
 
+    labels_df = pd.read_csv(args.labels_file)
+    labels_df['table_region'] = labels_df['table_region'].apply(ast.literal_eval)
 
-    train_dataset = SpreadsheetDataset(args.template_path)
-    test_dataset = SpreadsheetDataset(args.template_path)
+    feature_maps = []
+    for _, row in labels_df.iterrows():
+        sheet_name = row['sheet_name']
+        file_path = os.path.join(args.data_folder, row['file_path'])
+        for table_area in row['table_region']:
+
+            features_map = get_table_features2(file_path, sheet_name, table_area)
+            feature_maps.append(features_map)
+
+
+
+    train_dataset = SpreadsheetDataset(feature_maps)
+    test_dataset = SpreadsheetDataset(feature_maps)
 
 
     batch_size = args.batch_size  # For different-sized inputs

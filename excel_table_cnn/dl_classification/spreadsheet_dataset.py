@@ -42,23 +42,24 @@ def get_bounding_box(table_ranges):
 
 
 class SpreadsheetDataset(Dataset):
-    def __init__(self, template_path: str):
+    def __init__(self, feature_maps: list):
         # self.tensors = tensors
         # self.num_cell_features = tensors.num_cell_features
 
         self._epoch_iterations = 1000
         self._pairs = [self.generate_valid_pair() for _ in range(1000)]
-        self.example_features = self.get_example_features(template_path)
+        self._feature_maps = feature_maps
+        #self.example_features = self.get_example_features(template_path)
 
 
 
-    def get_example_features(self, template_path):
-        features_df = get_table_features(template_path, 'Sheet1')
-        features_df['file_path'] = '2231.xlsx'
-        features_df['sheet_name'] ='Sheet1'
-        features_df['table_range'] = [["A2:K7"]] * len(features_df)
-        features_df = DataframeTensors(features_df)
-        return features_df.hwc_tensors[0][1:]
+    # def get_example_features(self, template_path):
+    #     features_df = get_table_features(template_path, 'Sheet1')
+    #     features_df['file_path'] = '2231.xlsx'
+    #     features_df['sheet_name'] ='Sheet1'
+    #     features_df['table_range'] = [["A2:K7"]] * len(features_df)
+    #     features_df = DataframeTensors(features_df)
+    #     return features_df.hwc_tensors[0][1:]
 
 
     def __len__(self):
@@ -68,8 +69,8 @@ class SpreadsheetDataset(Dataset):
     @staticmethod
     def generate_valid_pair(limit=30000):
         while True:
-            a = random.randint(50, limit // 50)
-            b = random.randint(50, limit // 50)
+            a = random.randint(100, limit // 100)
+            b = random.randint(100, limit // 100)
             if a * b < limit:
                 return [a, b]
 
@@ -149,8 +150,10 @@ class SpreadsheetDataset(Dataset):
         H, W = self._pairs[idx]
         tensor = torch.zeros(H, W, 17)
         tensor[:, :, 0] = 1.0
+        featuremap_idx = random.randint(0, len(self._feature_maps))
+        tile = self._feature_maps[featuremap_idx]
 
-        locations = self.tile_matrix_randomly(tensor, self.example_features)
+        locations = self.tile_matrix_randomly(tensor, tile)
         box_classes = [1]* len(locations)
         labels = {'boxes': torch.tensor(locations, dtype=torch.float32), 'labels': torch.tensor(box_classes, dtype=torch.int64)}
 

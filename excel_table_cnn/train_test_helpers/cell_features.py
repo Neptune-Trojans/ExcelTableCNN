@@ -1,5 +1,9 @@
 import pandas as pd
 import openpyxl
+import torch
+from openpyxl.utils import range_boundaries
+
+from excel_table_cnn.dl_classification.tensors import preprocess_features
 
 
 def get_cell_features_xlsx(cur_cell):
@@ -36,6 +40,8 @@ def get_table_features(file_path, sheet_name) -> pd.DataFrame:
     min_col = 1
     max_col = ws.max_column
 
+
+
     data = []
     for row in ws.iter_rows(min_row=min_row, max_row=max_row, min_col=min_col, max_col=max_col):
         for cell in row:
@@ -43,3 +49,64 @@ def get_table_features(file_path, sheet_name) -> pd.DataFrame:
 
     result_df = pd.DataFrame(data)
     return result_df
+
+
+def process_sheet(self, group, max_rows, max_cols, num_cell_features, non_feature_columns):
+        sheet_tensor = torch.zeros((max_rows, max_cols, num_cell_features), dtype=torch.float32)
+
+        # Extract coordinates
+        coordinates = np.array([parse_coordinate(coord) for coord in group["coordinate"]])
+        row_indices, col_indices = coordinates[:, 0], coordinates[:, 1]
+
+        # Extract and process features
+        feature_matrix = np.stack(group.drop(columns=non_feature_columns).apply(preprocess_features, axis=1).to_numpy())
+
+        # Assign values efficiently
+        sheet_tensor[row_indices, col_indices, :] = torch.tensor(feature_matrix, dtype=torch.float32)
+
+        return sheet_tensor[:,:,:17]
+
+
+feature_order = [
+    'is_empty',
+    'is_string',
+    'is_merged',
+    'is_bold',
+    'is_italic',
+    'left_border',
+    'right_border',
+    'top_border',
+    'bottom_border',
+    'is_filled',
+    'horizontal_alignment',
+    'left_horizontal_alignment',
+    'right_horizontal_alignment',
+    'center_horizontal_alignment',
+    'wrapped_text',
+    'indent',
+    'formula'
+]
+
+
+def get_table_features2(file_path, sheet_name, table_area) -> pd.DataFrame:
+    wb = openpyxl.load_workbook(file_path)
+    ws = wb[sheet_name]
+
+    # Determine the actual data range
+    # min_row = 1
+    # max_row = ws.max_row
+    # min_col = 1
+    # max_col = ws.max_column
+
+    num_cell_features = 17
+    min_col, min_row, max_col, max_row = range_boundaries(table_area)
+    sheet_tensor = torch.zeros((max_row - min_row + 1, max_col - min_col + 1, num_cell_features), dtype=torch.float32)
+
+    data = []
+    for row_idx, row in enumerate(ws.iter_rows(min_row=min_row, max_row=max_row, min_col=min_col, max_col=max_col)):
+        for col_idx, cell in enumerate(row):
+            features = get_cell_features_xlsx(cell)
+            feature_matrix = torch.tensor([float(features[key]) for key in feature_order],dtype=torch.float32)
+            sheet_tensor[row_idx, col_idx] = feature_matrix
+
+    return sheet_tensor

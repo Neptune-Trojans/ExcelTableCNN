@@ -2,44 +2,6 @@ import torch
 from torch.utils.data import Dataset
 import random
 
-from .tensors import DataframeTensors
-from ..train_test_helpers import get_table_features
-
-
-def get_bounding_box(table_ranges):
-    boxes = torch.tensor(
-        [
-            [min_col, min_row, max_col, max_row]  # x_min, y_min, x_max, y_max
-            for min_col, min_row, max_col, max_row in table_ranges
-        ],
-        dtype=torch.float32,
-    )
-    # Assuming '1' is the label for tables:
-    labels = torch.ones((boxes.shape[0],), dtype=torch.int64)
-    return {"boxes": boxes, "labels": labels}
-
-
-# class SpreadsheetDataset(Dataset):
-#     def __init__(self, tensors: DataframeTensors):
-#         self.tensors = tensors
-#         self.num_cell_features = tensors.num_cell_features
-#
-#     def __len__(self):
-#         # The length of the dataset is the number of spreadsheets
-#         return len(self.tensors.hwc_tensors)
-#
-#     def __getitem__(self, idx):
-#         tensor = self.tensors.hwc_tensors[idx]
-#         # Permute tensor to C x H x W
-#         tensor = tensor.permute(2, 0, 1)
-#
-#         # Get labels
-#         labels = get_bounding_box(self.tensors.zero_indexed_table_ranges[idx])
-#
-#
-#
-#         return tensor, labels
-
 
 class SpreadsheetDataset(Dataset):
     def __init__(self, feature_maps: list):
@@ -47,10 +9,11 @@ class SpreadsheetDataset(Dataset):
         # self.num_cell_features = tensors.num_cell_features
 
         self._epoch_iterations = 1000
-        self._pairs = [self._generate_valid_pairs() for _ in range(1000)]
+
         self._feature_maps = feature_maps
         self._h_max = max(tensor.shape[0] for tensor in feature_maps)
         self._w_max = max(tensor.shape[1] for tensor in feature_maps)
+        self._pairs = [self._generate_valid_pairs() for _ in range(1000)]
         #self.example_features = self.get_example_features(template_path)
 
 

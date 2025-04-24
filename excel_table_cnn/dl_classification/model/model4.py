@@ -17,21 +17,12 @@ class FasterRCNNMobileNetMapped2(nn.Module):
         # Backbone with FPN
         backbone = mobilenet_backbone('mobilenet_v3_large', pretrained=pretrained, fpn=True)
 
-        # Get feature map keys from backbone using dummy input
-        # with torch.no_grad():
-        #     dummy_input = torch.randn(1, 3, image_size[0], image_size[1])
-        #     features = backbone(dummy_input)
-        #
-        #     print("Backbone feature map keys:", featmap_keys)
-
         featmap_keys = ['0', '1', 'pool']
         # Anchor generator — match number of feature maps
         anchor_generator = AnchorGenerator(
             sizes=tuple([(32,), (64,), (128,)]),
             aspect_ratios=tuple([(0.5, 1.0, 2.0)] * len(featmap_keys))
         )
-        print("Anchor sizes:", anchor_generator.sizes)
-        print("Aspect ratios:", anchor_generator.aspect_ratios)
 
         # RoI Pooler — match feature map keys
         roi_pooler = torchvision.ops.MultiScaleRoIAlign(

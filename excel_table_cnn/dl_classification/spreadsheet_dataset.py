@@ -61,12 +61,37 @@ class SpreadsheetDataset(Dataset):
             if torch.all(id_map[y1:y2, x1:x2] == 0):
                 map_tensor[y1:y2, x1:x2, :] = new_tile
                 locations.append((x1, y1, x2, y2))
-                id_map[y1:y2, x1:x2] = tile_id  # Assign tile ID
+                #id_map[y1:y2, x1:x2] = tile_id  # Assign tile ID
+                self.assign_tile_with_border(id_map, y1, y2, x1, x2, tile_id)
                 tile_id += 1
 
             attempts += 1
 
         return locations
+
+    def assign_tile_with_border(self, id_map, y1, y2, x1, x2, tile_id):
+        """
+        Assigns a tile ID to a rectangular region in a 2D tensor and sets a -1 border around it.
+
+        Args:
+            id_map (torch.Tensor): A 2D tensor of shape (H, W) where the assignment is made.
+            y1, y2 (int): Start and end (exclusive) indices along height for the tile region.
+            x1, x2 (int): Start and end (exclusive) indices along width for the tile region.
+            tile_id (int): The ID to assign to the tile region.
+        """
+        H, W = id_map.shape
+
+        # Compute padded border region (1-cell around the tile)
+        y1_pad = max(y1 - 1, 0)
+        y2_pad = min(y2 + 1, H)
+        x1_pad = max(x1 - 1, 0)
+        x2_pad = min(x2 + 1, W)
+
+        # Set border region to -1
+        id_map[y1_pad:y2_pad, x1_pad:x2_pad] = -1
+
+        # Re-assign the tile_id in the core region
+        id_map[y1:y2, x1:x2] = tile_id
 
     def resize_with_row_col_copy(self, matrix, h1, w1):
         h, w, c = matrix.shape

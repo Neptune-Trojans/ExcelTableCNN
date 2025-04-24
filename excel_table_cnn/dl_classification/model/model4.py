@@ -42,7 +42,7 @@ class FasterRCNNMobileNetMapped2(nn.Module):
                 max_size=image_size[1],
                 image_mean=[0.0, 0.0, 0.0],
                 image_std=[1.0, 1.0, 1.0]
-            )
+            ),rpn_score_thresh=0.3, box_score_thresh=0.3
         )
 
         in_features = self.detector.roi_heads.box_predictor.cls_score.in_features

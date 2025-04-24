@@ -49,7 +49,9 @@ class FasterRCNNMobileNetMapped2(nn.Module):
     def forward(self, x, targets=None):
         # Map 17-channel input to 3-channel for MobileNet
         x = [self.channel_mapper(img) for img in x]
-
+        # 🧪 Print backbone outputs
+        features = self.detector.backbone(x[0].unsqueeze(0))  # One sample
+        print("Backbone feature map keys:", features.keys())
         if self.training:
             return self.detector(x, targets)
         else:

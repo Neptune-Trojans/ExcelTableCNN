@@ -40,7 +40,10 @@ def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
 
             padded = []
             for img in images:
+
                 padded_img = torch.zeros(c, max_h, max_w, device=device, dtype=img.dtype)
+                padded_img[0, :, :] = 1.0
+
                 padded_img[:, :img.shape[1], :img.shape[2]] = img
                 padded.append(padded_img)
 

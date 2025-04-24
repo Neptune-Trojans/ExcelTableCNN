@@ -27,10 +27,10 @@ class SpreadsheetDataset(Dataset):
 
 
     def _generate_valid_pairs(self):
-            H = self._h_max
-            W = self._w_max
+        H = 256
+        W = 256
 
-            return H, W
+        return H, W
 
     def tile_matrix_randomly(self, map_tensor, max_tiles=10, max_attempts=50):
         H, W, C = map_tensor.shape

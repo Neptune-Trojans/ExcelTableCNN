@@ -4,13 +4,15 @@ from collections import defaultdict
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
 from .model3 import FasterRCNNMobileNetMapped
+from .model4 import FasterRCNNMobileNetMapped2
 from ...train_test_helpers.cell_features import generate_feature_tensor
 
 
 def get_model(in_channels=2):
     # model = TableDetectionModel(in_channels)
     #model = MultiChannelRetinaNet(input_channels=in_channels, num_classes=2, pretrained=False)
-    model = FasterRCNNMobileNetMapped(input_channels=in_channels, num_classes=2)
+    #model = FasterRCNNMobileNetMapped(input_channels=in_channels, num_classes=2)
+    model = FasterRCNNMobileNetMapped2(input_channels=in_channels, num_classes=2)
     return model
 
 

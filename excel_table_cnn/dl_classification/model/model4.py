@@ -21,7 +21,7 @@ class FasterRCNNMobileNetMapped2(nn.Module):
         # Anchor generator — match number of feature maps
         anchor_generator = AnchorGenerator(
             sizes=tuple([(32,), (64,), (128,)]),
-            aspect_ratios=tuple([(0.5, 1.0, 2.0)] * len(featmap_keys))
+            aspect_ratios=tuple([(0.2, 0.5, 1.0, 2.0)] * len(featmap_keys))
         )
 
         # RoI Pooler — match feature map keys
@@ -42,7 +42,7 @@ class FasterRCNNMobileNetMapped2(nn.Module):
                 max_size=image_size[1],
                 image_mean=[0.0, 0.0, 0.0],
                 image_std=[1.0, 1.0, 1.0]
-            ),rpn_score_thresh=0.3, box_score_thresh=0.3
+            )
         )
 
         in_features = self.detector.roi_heads.box_predictor.cls_score.in_features

@@ -26,8 +26,12 @@ class FasterRCNNMobileNetMapped2(nn.Module):
         print("Anchor sizes:", anchor_generator.sizes)
         print("Aspect ratios:", anchor_generator.aspect_ratios)
 
+        # RoI Pooler for 3 levels from backbone
         roi_pooler = torchvision.ops.MultiScaleRoIAlign(
-            featmap_names=['0'], output_size=7, sampling_ratio=2)
+            featmap_names=['0', '1', 'pool'],  # Match backbone outputs
+            output_size=7,
+            sampling_ratio=2
+        )
 
         self.detector = FasterRCNN(
             backbone,

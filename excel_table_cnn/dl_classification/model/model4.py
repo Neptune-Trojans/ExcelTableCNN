@@ -19,8 +19,8 @@ class FasterRCNNMobileNetMapped2(nn.Module):
 
         # Construct detector manually to override transform
         anchor_generator = AnchorGenerator(
-            sizes=((32, 64, 128, 256, 512),),
-            aspect_ratios=((0.5, 1.0, 2.0),)
+            sizes=((32,), (64,), (128,), (256,), (512,)),
+            aspect_ratios=((0.5, 1.0, 2.0),) * 5
         )
 
         roi_pooler = torchvision.ops.MultiScaleRoIAlign(

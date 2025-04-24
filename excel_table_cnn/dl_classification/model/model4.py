@@ -11,28 +11,34 @@ class FasterRCNNMobileNetMapped2(nn.Module):
     def __init__(self, input_channels, num_classes, image_size=(400, 400), pretrained=True):
         super().__init__()
 
-        # 1x1 conv to reduce input channels to 3
         self.channel_mapper = nn.Conv2d(input_channels, 3, kernel_size=1)
 
-        # Backbone (without FPN wrapper here)
+        # Backbone with FPN
         backbone = mobilenet_backbone('mobilenet_v3_large', pretrained=pretrained, fpn=True)
 
-        # Construct detector manually to override transform
+        # Get feature map keys from backbone using dummy input
+        with torch.no_grad():
+            dummy_input = torch.randn(1, 3, image_size[0], image_size[1])
+            features = backbone(dummy_input)
+            featmap_keys = list(features.keys())
+            print("Backbone feature map keys:", featmap_keys)
+
+        # Anchor generator — match number of feature maps
         anchor_generator = AnchorGenerator(
-            sizes=((32,), (64,), (128,), (256,), (512,)),  # 5 tuples for 5 levels
-            aspect_ratios=((0.5, 1.0, 2.0),) * 5  # repeat for each level
+            sizes=tuple([(32,)] * len(featmap_keys)),
+            aspect_ratios=tuple([(0.5, 1.0, 2.0)] * len(featmap_keys))
         )
-        # 🧪 Debug prints
         print("Anchor sizes:", anchor_generator.sizes)
         print("Aspect ratios:", anchor_generator.aspect_ratios)
 
-        # RoI Pooler for 3 levels from backbone
+        # RoI Pooler — match feature map keys
         roi_pooler = torchvision.ops.MultiScaleRoIAlign(
-            featmap_names=['0', '1', 'pool'],  # Match backbone outputs
+            featmap_names=featmap_keys,
             output_size=7,
             sampling_ratio=2
         )
 
+        # Full model
         self.detector = FasterRCNN(
             backbone,
             num_classes=num_classes,
@@ -46,16 +52,11 @@ class FasterRCNNMobileNetMapped2(nn.Module):
             )
         )
 
-        # Replace box predictor (classification head)
         in_features = self.detector.roi_heads.box_predictor.cls_score.in_features
         self.detector.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
 
     def forward(self, x, targets=None):
-        # Map 17-channel input to 3-channel for MobileNet
         x = [self.channel_mapper(img) for img in x]
-        # 🧪 Print backbone outputs
-        features = self.detector.backbone(x[0].unsqueeze(0))  # One sample
-        print("Backbone feature map keys:", features.keys())
         if self.training:
             return self.detector(x, targets)
         else:

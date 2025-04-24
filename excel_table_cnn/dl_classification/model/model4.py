@@ -21,7 +21,7 @@ class FasterRCNNMobileNetMapped2(nn.Module):
         # Anchor generator — match number of feature maps
         anchor_generator = AnchorGenerator(
             sizes=tuple([(32,), (64,), (128,)]),
-            aspect_ratios=tuple([(0.2, 0.5, 1.0, 2.0)] * len(featmap_keys))
+            aspect_ratios=tuple([(0.5, 1.0, 2.0)] * len(featmap_keys))
         )
 
         # RoI Pooler — match feature map keys

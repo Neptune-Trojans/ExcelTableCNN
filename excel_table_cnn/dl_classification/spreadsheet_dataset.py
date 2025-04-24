@@ -2,6 +2,8 @@ import torch
 from torch.utils.data import Dataset
 import random
 
+from excel_table_cnn.train_test_helpers.cell_features import generate_feature_tensor
+
 
 class SpreadsheetDataset(Dataset):
     def __init__(self, feature_maps: list, device):
@@ -90,8 +92,10 @@ class SpreadsheetDataset(Dataset):
     def __getitem__(self, idx):
 
         H, W = self._pairs[idx]
-        tensor = torch.zeros(H, W, 17, device=self._device)
-        tensor[:, :, 0] = 1.0
+        # tensor = torch.zeros(H, W, 17, device=self._device)
+        # tensor[:, :, 0] = 1.0
+
+        tensor = generate_feature_tensor(H, W, device=self._device)
 
         locations = self.tile_matrix_randomly(tensor)
         box_classes = [1]* len(locations)

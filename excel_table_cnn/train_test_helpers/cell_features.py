@@ -110,3 +110,24 @@ def get_table_features2(file_path, sheet_name, table_area) -> pd.DataFrame:
             sheet_tensor[row_idx, col_idx] = feature_matrix
 
     return sheet_tensor
+
+
+def generate_feature_tensor(H, W, device):
+    """
+    Generate a (H, W, 17) tensor where each cell contains the same predefined 17D vector.
+
+    Args:
+        H (int): Height of the output tensor.
+        W (int): Width of the output tensor.
+
+    Returns:
+        torch.Tensor: A tensor of shape (H, W, 17)
+    """
+    # Define the 17D feature vector
+    base_vector = torch.tensor([
+        0., 1., 0., 0., 0., 1., 1., 1., 1., 1.,
+        0., 0., 0., 0., 1., 0., 0.
+    ], device=device)
+
+    # Repeat it H * W times and reshape to (H, W, 17)
+    return base_vector.repeat(H * W, 1).view(H, W, 17)

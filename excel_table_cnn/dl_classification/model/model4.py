@@ -22,6 +22,9 @@ class FasterRCNNMobileNetMapped2(nn.Module):
             sizes=((32,), (64,), (128,), (256,), (512,)),  # 5 tuples for 5 levels
             aspect_ratios=((0.5, 1.0, 2.0),) * 5  # repeat for each level
         )
+        # 🧪 Debug prints
+        print("Anchor sizes:", anchor_generator.sizes)
+        print("Aspect ratios:", anchor_generator.aspect_ratios)
 
         roi_pooler = torchvision.ops.MultiScaleRoIAlign(
             featmap_names=['0'], output_size=7, sampling_ratio=2)

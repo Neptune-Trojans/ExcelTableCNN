@@ -46,6 +46,7 @@ def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
                 # padded_img[0, :, :] = 1.0
 
                 padded_img = generate_feature_tensor(max_h, max_w, device=device)
+                padded_img = padded_img.permute(2, 0, 1)
 
                 padded_img[:, :img.shape[1], :img.shape[2]] = img
                 padded.append(padded_img)

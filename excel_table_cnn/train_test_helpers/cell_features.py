@@ -125,8 +125,7 @@ def generate_feature_tensor(H, W, device):
     """
     # Define the 17D feature vector
     base_vector = torch.tensor([
-        0., 1., 0., 0., 0., 1., 1., 1., 1., 1.,
-        0., 0., 0., 0., 1., 0., 0.
+        1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     ], device=device)
 
     # Repeat it H * W times and reshape to (H, W, 17)

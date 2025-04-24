@@ -8,7 +8,7 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 import torch.nn as nn
 
 class FasterRCNNMobileNetMapped2(nn.Module):
-    def __init__(self, input_channels, num_classes, image_size=(256, 256), pretrained=True):
+    def __init__(self, input_channels, num_classes, image_size=(400, 400), pretrained=True):
         super().__init__()
 
         # 1x1 conv to reduce input channels to 3

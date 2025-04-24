@@ -27,8 +27,8 @@ class SpreadsheetDataset(Dataset):
 
 
     def _generate_valid_pairs(self):
-        H = 256
-        W = 256
+        H = 400
+        W = 400
 
         return H, W
 

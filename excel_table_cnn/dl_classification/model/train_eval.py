@@ -1,9 +1,8 @@
 import torch
 from torch.utils.data import DataLoader
 from collections import defaultdict
+from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
-from .model import TableDetectionModel
-from .model2 import MultiChannelRetinaNet
 from .model3 import FasterRCNNMobileNetMapped
 
 
@@ -68,85 +67,23 @@ def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
         print(f"Epoch {epoch}: Loss: {epoch_loss / len(train_loader)} lr: {scheduler.get_last_lr()[0]}")
 
 
-def calculate_iou(pred_box, gt_box):
-    # Determine the coordinates of the intersection rectangle
-    xA = max(pred_box[0], gt_box[0])
-    yA = max(pred_box[1], gt_box[1])
-    xB = min(pred_box[2], gt_box[2])
-    yB = min(pred_box[3], gt_box[3])
-
-    # Compute the area of intersection
-    interArea = max(0, xB - xA) * max(0, yB - yA)
-
-    # Compute the area of both the prediction and ground-truth rectangles
-    predBoxArea = (pred_box[2] - pred_box[0]) * (pred_box[3] - pred_box[1])
-    gtBoxArea = (gt_box[2] - gt_box[0]) * (gt_box[3] - gt_box[1])
-
-    # Compute the intersection over union by taking the intersection
-    # area and dividing it by the sum of prediction + ground-truth
-    # areas - the interesection area
-    iou = interArea / float(predBoxArea + gtBoxArea - interArea)
-
-    return iou
-
-
-def evaluate_model(model, test_loader, device, iou_threshold=0.5):
+def evaluate_model(model, test_loader, device, iou_threshold=0.5, conf_score=0.3):
     model.to(device)
     model.eval()
 
     all_detections = defaultdict(list)
     all_ground_truths = defaultdict(list)
+    metric = MeanAveragePrecision(iou_thresholds=[0.5])
 
     with torch.no_grad():
         for images, targets in test_loader:
             images = [img.to(device) for img in images]
-            outputs = model(images)
+            preds = model(images)
+            # Update it with your batches
+            metric.update(preds, targets)
 
-            for i, output in enumerate(outputs):
-                # Assuming single class; adapt as needed for multiple classes
-                for box, score in zip(output["boxes"], output["scores"]):
-                    all_detections[i].append((box.cpu().numpy(), score.item()))
-
-                for gt_box in targets[i]["boxes"]:
-                    all_ground_truths[i].append(gt_box.cpu().numpy())
-
-    # Calculate TP, FP, FN for each image
-    TPs, FPs, FNs = [], [], []
-    for image_id, detections in all_detections.items():
-        gt_boxes = all_ground_truths[image_id]
-        detected = []
-
-        for pred_box, score in sorted(detections, key=lambda x: x[1], reverse=True):
-            if score < iou_threshold:
-                continue
-
-            for gt_box in gt_boxes:
-                iou = calculate_iou(pred_box, gt_box)
-
-                if iou >= iou_threshold:
-                    if gt_box not in detected:
-                        TPs.append((image_id, pred_box, gt_box))
-                        detected.append(gt_box)
-                        break
-            else:
-                FPs.append((image_id, pred_box))
-
-        for gt_box in gt_boxes:
-            if gt_box not in detected:
-                FNs.append((image_id, gt_box))
-
-    # Calculate precision and recall
-    precision = len(TPs) / (len(TPs) + len(FPs)) if TPs or FPs else 0
-    recall = len(TPs) / (len(TPs) + len(FNs)) if TPs or FNs else 0
-    print(f'precision: {precision}, recall {recall}')
-    # Compute AP as the area under the precision-recall curve
-    # This can be more complex in practice. Here's a simple version
-    AP = precision * recall
-
-    # Assuming single class. For multiple classes, calculate AP for each and then average
-    mAP = AP
-
-    return mAP
+    results = metric.compute()
+    print(results)
 
 
 def get_model_output(model, test_loader, device):

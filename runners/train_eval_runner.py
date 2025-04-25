@@ -69,7 +69,7 @@ if __name__ == '__main__':
     labels_df['table_region'] = labels_df['table_region'].apply(ast.literal_eval)
 
     feature_maps = extract_feature_maps_from_labels(labels_df, args.data_folder)
-    aspect_ratios = compute_feature_map_aspect_ratios(feature_maps)
+    #aspect_ratios = compute_feature_map_aspect_ratios(feature_maps)
     # for _, row in labels_df.iterrows():
     #     sheet_name = row['sheet_name']
     #     file_path = os.path.join(args.data_folder, row['file_path'])

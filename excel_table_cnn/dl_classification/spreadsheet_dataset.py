@@ -96,7 +96,7 @@ class SpreadsheetDataset(Dataset):
     def resize_with_row_col_copy(self, matrix, h1, w1):
         h, w, c = matrix.shape
 
-        new_matrix = torch.zeros(h1, w1, 18, device=self._device)
+        new_matrix = torch.zeros(h1, w1, 17, device=self._device)
         # Start with trimmed or same-size version
         new_matrix[:h, :w,  :] = matrix
 

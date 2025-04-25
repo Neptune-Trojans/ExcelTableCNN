@@ -1,5 +1,4 @@
 import numpy as np
-import torch
 
 
 def compute_feature_map_aspect_ratios(feature_maps):
@@ -38,24 +37,3 @@ def compute_feature_map_aspect_ratios(feature_maps):
     print(f"Wide (>1.5): {wide} examples")
 
     return aspect_ratios
-
-def unique_feature_vectors_with_counts(x):
-    """
-    Given a tensor of shape (N, M, 17), returns unique 17D feature vectors and their occurrence counts.
-
-    Args:
-        x (torch.Tensor): Input tensor of shape (N, M, 17)
-
-    Returns:
-        unique_vectors (Tensor): Unique feature vectors (K, 17)
-        counts (Tensor): Counts of each unique vector (K,)
-    """
-    # Flatten to (N*M, 17)
-    x_flat = x.view(-1, x.shape[-1])
-
-    # Use torch.unique with return_counts
-    unique_vectors, counts = torch.unique(x_flat, dim=0, return_counts=True)
-    for vector, count in zip(unique_vectors, counts):
-        print(f'{vector} count:{count}')
-
-    return unique_vectors, counts

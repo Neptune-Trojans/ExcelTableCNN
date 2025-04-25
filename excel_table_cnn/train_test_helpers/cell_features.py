@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import openpyxl
 import torch
@@ -130,3 +132,29 @@ def generate_feature_tensor(H, W, device):
 
     # Repeat it H * W times and reshape to (H, W, 17)
     return base_vector.repeat(H * W, 1).view(H, W, 17)
+
+
+def extract_feature_maps_from_labels(labels_df, data_folder):
+    """
+    Extracts feature maps from a labeled DataFrame using a custom feature extraction function.
+
+    Args:
+        labels_df (pd.DataFrame): DataFrame with columns ['sheet_name', 'file_path', 'table_region']
+        data_folder (str): Root folder where spreadsheet files are located
+
+    Returns:
+        List[Tensor]: A list of feature maps extracted from the dataset
+    """
+    feature_maps = []
+
+    for _, row in labels_df.iterrows():
+        sheet_name = row['sheet_name']
+        file_path = os.path.join(data_folder, row['file_path'])
+
+        for table_area in row['table_region']:
+            features_map = get_table_features2(file_path, sheet_name, table_area)
+            feature_maps.append(features_map)
+
+    return feature_maps
+
+

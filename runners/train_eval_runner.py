@@ -13,8 +13,9 @@ from excel_table_cnn.dl_classification.model.train_eval import get_model, train_
 from excel_table_cnn.dl_classification.spreadsheet_dataset import SpreadsheetDataset
 from excel_table_cnn.dl_classification.tensors import DataframeTensors
 from excel_table_cnn.train_test_helpers import get_table_features
-from excel_table_cnn.train_test_helpers.cell_features import get_table_features2
+from excel_table_cnn.train_test_helpers.cell_features import get_table_features2, extract_feature_maps_from_labels
 from excel_table_cnn.train_test_helpers.train_test_composer import get_train_test
+from excel_table_cnn.train_test_helpers.utils import compute_feature_map_aspect_ratios
 
 data_folder_path = 'data'
 
@@ -45,7 +46,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs_number', type=int, help='number of epochs')
     parser.add_argument('--batch_size', type=int, help='batch size')
     parser.add_argument('--learning_rate', type=float, default=1e-5, help='batch size')
-    parser.add_argument('--template_path', type=str, help='batch size')
+
     args = parser.parse_args()
 
 
@@ -67,14 +68,16 @@ if __name__ == '__main__':
     labels_df = pd.read_csv(args.labels_file)
     labels_df['table_region'] = labels_df['table_region'].apply(ast.literal_eval)
 
-    feature_maps = []
-    for _, row in labels_df.iterrows():
-        sheet_name = row['sheet_name']
-        file_path = os.path.join(args.data_folder, row['file_path'])
-        for table_area in row['table_region']:
+    feature_maps = extract_feature_maps_from_labels(labels_df, args.data_folder)
+    aspect_ratios = compute_feature_map_aspect_ratios(feature_maps)
+    # for _, row in labels_df.iterrows():
+    #     sheet_name = row['sheet_name']
+    #     file_path = os.path.join(args.data_folder, row['file_path'])
+    #     for table_area in row['table_region']:
+    #
+    #         features_map = get_table_features2(file_path, sheet_name, table_area)
+    #         feature_maps.append(features_map)
 
-            features_map = get_table_features2(file_path, sheet_name, table_area)
-            feature_maps.append(features_map)
 
     device = get_device()
 

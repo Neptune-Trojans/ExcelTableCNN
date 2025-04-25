@@ -116,60 +116,61 @@ def get_table_features2(file_path, sheet_name, table_area):
     return sheet_tensor
 
 
-# def generate_feature_tensor(H, W, device):
-#     """
-#     Generate a (H, W, 17) tensor where each cell contains the same predefined 17D vector.
-#
-#     Args:
-#         H (int): Height of the output tensor.
-#         W (int): Width of the output tensor.
-#
-#     Returns:
-#         torch.Tensor: A tensor of shape (H, W, 17)
-#     """
-#     # Define the 17D feature vector
-#     base_vector = torch.tensor([
-#         1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-#     ], device=device)
-#
-#     # Repeat it H * W times and reshape to (H, W, 17)
-#     return base_vector.repeat(H * W, 1).view(H, W, 17)
-
-def generate_feature_tensor(H, W, device, noise_probability=0.3):
+def generate_feature_tensor(H, W, device):
     """
-    Efficiently generate a (H, W, 17) tensor filled with a base vector,
-    and randomly replace some cells with random boolean noise vectors.
+    Generate a (H, W, 17) tensor where each cell contains the same predefined 17D vector.
 
     Args:
-        H (int): Height
-        W (int): Width
-        device: Torch device ('cuda' or 'cpu')
-        noise_probability (float): Probability of applying noise per cell
+        H (int): Height of the output tensor.
+        W (int): Width of the output tensor.
 
     Returns:
-        torch.Tensor: (H, W, 18) tensor
+        torch.Tensor: A tensor of shape (H, W, 17)
     """
-    # Define the base 17D feature vector
+    # Define the 17D feature vector
     base_vector = torch.tensor([
         1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        1.0, 1.0, 1.0, 1.0,
-        0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0
+        1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     ], device=device)
 
-    # Create the clean tensor
-    tensor = base_vector.expand(H, W, -1).clone()
+    # Repeat it H * W times and reshape to (H, W, 17)
+    return base_vector.repeat(H * W, 1).view(H, W, 17)
 
-    # Generate a mask where noise will be applied
-    apply_noise_mask = (torch.rand(H, W, device=device) < noise_probability).unsqueeze(-1)  # (H, W, 1)
-
-    # Generate random noise for all cells
-    random_noise = torch.randint(0, 2, (H, W, 18), device=device).float()
-
-    # Replace selected cells in one shot
-    tensor = torch.where(apply_noise_mask, random_noise, tensor)
-
-    return tensor
+# def generate_feature_tensor(H, W, device, noise_probability=0.3):
+#     """
+#     Efficiently generate a (H, W, 17) tensor filled with a base vector,
+#     and randomly replace some cells with random boolean noise vectors.
+#
+#     Args:
+#         H (int): Height
+#         W (int): Width
+#         device: Torch device ('cuda' or 'cpu')
+#         noise_probability (float): Probability of applying noise per cell
+#
+#     Returns:
+#         torch.Tensor: (H, W, 18) tensor
+#     """
+#     # Define the base 17D feature vector
+#     base_vector = torch.tensor([
+#         1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+#         1.0, 1.0, 1.0, 1.0,
+#         0.0, 0.0, 0.0, 0.0,
+#         0.0, 0.0, 0.0, 0.0
+#     ], device=device)
+#
+#     # Create the clean tensor
+#     tensor = base_vector.expand(H, W, -1).clone()
+#
+#     # Generate a mask where noise will be applied
+#     apply_noise_mask = (torch.rand(H, W, device=device) < noise_probability).unsqueeze(-1)  # (H, W, 1)
+#
+#     # Generate random noise for all cells
+#     random_noise = torch.randint(0, 2, (H, W, 18), device=device).float()
+#
+#     # Replace selected cells in one shot
+#     tensor = torch.where(apply_noise_mask, random_noise, tensor)
+#
+#     return tensor
 
 
 def extract_feature_maps_from_labels(labels_df, data_folder):

@@ -134,7 +134,7 @@ def generate_feature_tensor(H, W, device):
     ], device=device)
 
     # Repeat it H * W times and reshape to (H, W, 17)
-    return base_vector.repeat(H * W, 1).view(H, W, 17)
+    return base_vector.repeat(H * W, 1).view(H, W, 18)
 
 # def generate_feature_tensor(H, W, device, noise_probability=0.3):
 #     """

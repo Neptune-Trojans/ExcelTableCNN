@@ -13,6 +13,7 @@ def get_cell_features_xlsx(cur_cell):
         "coordinate": cur_cell.coordinate,
         "is_empty": cur_cell.value is None,
         "is_string": cur_cell.data_type in ["s", "str"],
+        "is_numeric": cur_cell.data_type in ["n"],
         "is_merged": type(cur_cell).__name__ == "MergedCell",
         "is_bold": cur_cell.font.b or False,
         "is_italic": cur_cell.font.i or False,
@@ -66,12 +67,13 @@ def process_sheet(self, group, max_rows, max_cols, num_cell_features, non_featur
         # Assign values efficiently
         sheet_tensor[row_indices, col_indices, :] = torch.tensor(feature_matrix, dtype=torch.float32)
 
-        return sheet_tensor[:,:,:17]
+        return sheet_tensor[:,:,:18]
 
 
 feature_order = [
     'is_empty',
     'is_string',
+    'is_numeric'
     'is_merged',
     'is_bold',
     'is_italic',
@@ -100,7 +102,7 @@ def get_table_features2(file_path, sheet_name, table_area):
     # min_col = 1
     # max_col = ws.max_column
 
-    num_cell_features = 17
+    num_cell_features = 18
     min_col, min_row, max_col, max_row = range_boundaries(table_area)
     sheet_tensor = torch.zeros((max_row - min_row + 1, max_col - min_col + 1, num_cell_features), dtype=torch.float32)
 
@@ -127,7 +129,7 @@ def get_table_features2(file_path, sheet_name, table_area):
 #     """
 #     # Define the 17D feature vector
 #     base_vector = torch.tensor([
-#         1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+#         1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 #     ], device=device)
 #
 #     # Repeat it H * W times and reshape to (H, W, 17)
@@ -145,11 +147,11 @@ def generate_feature_tensor(H, W, device, noise_probability=0.3):
         noise_probability (float): Probability of applying noise per cell
 
     Returns:
-        torch.Tensor: (H, W, 17) tensor
+        torch.Tensor: (H, W, 18) tensor
     """
     # Define the base 17D feature vector
     base_vector = torch.tensor([
-        1.0, 0.0, 0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
         1.0, 1.0, 1.0, 1.0,
         0.0, 0.0, 0.0, 0.0,
         0.0, 0.0, 0.0, 0.0
@@ -162,7 +164,7 @@ def generate_feature_tensor(H, W, device, noise_probability=0.3):
     apply_noise_mask = (torch.rand(H, W, device=device) < noise_probability).unsqueeze(-1)  # (H, W, 1)
 
     # Generate random noise for all cells
-    random_noise = torch.randint(0, 2, (H, W, 17), device=device).float()
+    random_noise = torch.randint(0, 2, (H, W, 18), device=device).float()
 
     # Replace selected cells in one shot
     tensor = torch.where(apply_noise_mask, random_noise, tensor)

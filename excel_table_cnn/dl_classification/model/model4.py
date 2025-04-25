@@ -1,7 +1,7 @@
 import torch
 import torchvision
 from torchvision.models.detection import FasterRCNN
-from torchvision.models.detection.rpn import AnchorGenerator
+from torchvision.models.detection.rpn import AnchorGenerator, RPNHead, RegionProposalNetwork
 from torchvision.models.detection.transform import GeneralizedRCNNTransform
 from torchvision.models.detection.backbone_utils import mobilenet_backbone
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
@@ -34,10 +34,28 @@ class FasterRCNNMobileNetMapped2(nn.Module):
             sampling_ratio=2
         )
 
+        rpn_head = RPNHead(
+            in_channels=backbone.out_channels,  # usually 256 for FPN
+            num_anchors=10  # IMPORTANT: number of anchors per location at first feature map
+        )
+
+        rpn = RegionProposalNetwork(
+            anchor_generator=anchor_generator,
+            head=rpn_head,
+            fg_iou_thresh=0.7,
+            bg_iou_thresh=0.3,
+            batch_size_per_image=256,
+            positive_fraction=0.5,
+            pre_nms_top_n={'training': 2000, 'testing': 1000},
+            post_nms_top_n={'training': 2000, 'testing': 1000},
+            nms_thresh=0.7
+        )
+
         # Full model
         self.detector = FasterRCNN(
             backbone,
             num_classes=num_classes,
+            rpn=rpn,  # USE THE CUSTOM RPN
             rpn_anchor_generator=anchor_generator,
             box_roi_pool=roi_pooler,
             transform=GeneralizedRCNNTransform(

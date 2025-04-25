@@ -73,7 +73,7 @@ def process_sheet(self, group, max_rows, max_cols, num_cell_features, non_featur
 feature_order = [
     'is_empty',
     'is_string',
-    'is_numeric'
+    'is_numeric',
     'is_merged',
     'is_bold',
     'is_italic',

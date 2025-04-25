@@ -82,7 +82,7 @@ def evaluate_model(model, test_loader, device, iou_threshold=0.5, conf_score=0.3
 
     all_detections = defaultdict(list)
     all_ground_truths = defaultdict(list)
-    metric = MeanAveragePrecision(iou_thresholds=[0.5])
+    metric = MeanAveragePrecision()
 
     with torch.no_grad():
         for images, targets in test_loader:

@@ -53,44 +53,21 @@ if __name__ == '__main__':
     init_dataframe_view()
 
     model = get_model(17)
-    # train_df, test_df = get_train_test(args.labels_file, args.data_folder, args.output_folder)
-
-    #train_df = pd.read_pickle(os.path.join(args.output_folder, "train_features.pkl"))
-    #test_df = pd.read_pickle(os.path.join(args.output_folder, "test_features.pkl"))
-
-    #train_df['table_range'] = train_df['table_range'].apply(ast.literal_eval)
-    #test_df['table_range'] = test_df['table_range'].apply(ast.literal_eval)
-
-
-    #train_df = DataframeTensors(train_df)
-    #test_df = DataframeTensors(test_df)
 
     labels_df = pd.read_csv(args.labels_file)
     labels_df['table_region'] = labels_df['table_region'].apply(ast.literal_eval)
 
-    feature_maps = extract_feature_maps_from_labels(labels_df, args.data_folder)
-    #aspect_ratios = compute_feature_map_aspect_ratios(feature_maps)
-    # for _, row in labels_df.iterrows():
-    #     sheet_name = row['sheet_name']
-    #     file_path = os.path.join(args.data_folder, row['file_path'])
-    #     for table_area in row['table_region']:
-    #
-    #         features_map = get_table_features2(file_path, sheet_name, table_area)
-    #         feature_maps.append(features_map)
-
+    table_feature_maps = extract_feature_maps_from_labels(labels_df, args.data_folder)
 
     device = get_device()
 
-    train_dataset = SpreadsheetDataset(feature_maps, device)
-    test_dataset = SpreadsheetDataset(feature_maps, device)
+    train_dataset = SpreadsheetDataset(table_feature_maps, device)
+    test_dataset = SpreadsheetDataset(table_feature_maps, device)
 
 
     batch_size = args.batch_size  # For different-sized inputs
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
-
-
-
 
     optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=0.9, weight_decay=0.0001)
     scheduler = MultiStepLR(optimizer, milestones=[10, 20, 40], gamma=0.1)

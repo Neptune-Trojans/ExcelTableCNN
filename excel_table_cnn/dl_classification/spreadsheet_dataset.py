@@ -33,8 +33,10 @@ class SpreadsheetDataset(Dataset):
             tile_idx = random.randint(0, len(self._tables) - 1)
             tile = self._tables[tile_idx]
             h, w, _ = tile.shape
-            h1 = random.randint(h, H - 1)
-            w1 = random.randint(w, W - 1 )
+            # Prevent tiles smaller than 2x2
+            min_tile_size = 2
+            h1 = random.randint(max(h, min_tile_size), H)
+            w1 = random.randint(max(w, min_tile_size), W)
 
             new_tile = self.resize_with_row_col_copy(tile, h1, w1)
 

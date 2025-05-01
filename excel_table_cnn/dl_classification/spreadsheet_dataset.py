@@ -33,13 +33,13 @@ class SpreadsheetDataset(Dataset):
             tile_idx = random.randint(0, len(self._tables) - 1)
             tile = self._tables[tile_idx]
             h, w, _ = tile.shape
-            h1 = random.randint(h, H)
-            w1 = random.randint(w, W)
+            h1 = random.randint(h + 1, H)
+            w1 = random.randint(w + 1, W)
 
             new_tile = self.resize_with_row_col_copy(tile, h1, w1)
 
-            y1 = random.randint(0, H - h1 - 1)
-            x1 = random.randint(0, W - w1 - 1)
+            y1 = random.randint(0, H - h1)
+            x1 = random.randint(0, W - w1)
             y2 = y1 + h1
             x2 = x1 + w1
 

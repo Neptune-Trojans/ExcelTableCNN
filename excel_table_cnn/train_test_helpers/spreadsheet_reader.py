@@ -43,6 +43,7 @@ class SpreadsheetReader:
             table_slice = sheet_tensor[min_row:max_row, min_col:max_col].copy()
             tables_features.append(table_slice)
             height, width = table_slice.shape[:2]
+
             sheet_tensor[min_row:max_row, min_col:max_col] = np.tile(self._empty_cell, (height, width, 1))
 
         return tables_features, background_features

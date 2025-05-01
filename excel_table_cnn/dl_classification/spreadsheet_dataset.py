@@ -38,8 +38,8 @@ class SpreadsheetDataset(Dataset):
 
             new_tile = self.resize_with_row_col_copy(tile, h1, w1)
 
-            y1 = random.randint(0, H - h1)
-            x1 = random.randint(0, W - w1)
+            y1 = random.randint(0, H - h1 - 1)
+            x1 = random.randint(0, W - w1 - 1)
             y2 = y1 + h1
             x2 = x1 + w1
 

@@ -10,8 +10,6 @@ class SpreadsheetDataset(Dataset):
         self._epoch_iterations = 1000
 
         self._tables = [torch.tensor(table, dtype=torch.float32, device=self._device) for table in tables]
-
-        self._backgrounds = backgrounds
         self._backgrounds = [torch.tensor(background, dtype=torch.float32, device=self._device) for background in backgrounds]
 
         self._h_max = max(tensor.shape[0] for tensor in self._tables)
@@ -48,7 +46,7 @@ class SpreadsheetDataset(Dataset):
             # Check if area is untiled (all zeros)
             if torch.all(id_map[y1:y2, x1:x2] == 0):
                 background[y1:y2, x1:x2, :] = new_tile
-                locations.append((x1, y1, x2, y2))
+                locations.append((x1, y1, x2 - 1, y2 - 1))
                 #id_map[y1:y2, x1:x2] = tile_id  # Assign tile ID
                 self.assign_tile_with_border(id_map, y1, y2, x1, x2, tile_id)
                 tile_id += 1

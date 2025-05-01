@@ -106,7 +106,7 @@ class SpreadsheetDataset(Dataset):
 
         background_idx = random.randint(0, len(self._backgrounds) - 1)
 
-        background_map = self._backgrounds[background_idx]
+        background_map = self._backgrounds[background_idx].clone()
 
         locations = self.tile_matrix_randomly(background_map)
         box_classes = [1]* len(locations)

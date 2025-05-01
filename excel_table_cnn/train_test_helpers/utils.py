@@ -1,6 +1,9 @@
 import numpy as np
 
 
+
+
+
 def compute_feature_map_aspect_ratios(feature_maps):
     """
     Computes the aspect ratio (width / height) for each table feature map.

@@ -14,6 +14,7 @@ from excel_table_cnn.dl_classification.spreadsheet_dataset import SpreadsheetDat
 from excel_table_cnn.dl_classification.tensors import DataframeTensors
 from excel_table_cnn.train_test_helpers import get_table_features
 from excel_table_cnn.train_test_helpers.cell_features import get_table_features2, extract_feature_maps_from_labels
+from excel_table_cnn.train_test_helpers.spreadsheet_reader import SpreadsheetReader
 from excel_table_cnn.train_test_helpers.train_test_composer import get_train_test
 from excel_table_cnn.train_test_helpers.utils import compute_feature_map_aspect_ratios
 
@@ -57,12 +58,15 @@ if __name__ == '__main__':
     labels_df = pd.read_csv(args.labels_file)
     labels_df['table_region'] = labels_df['table_region'].apply(ast.literal_eval)
 
-    table_feature_maps = extract_feature_maps_from_labels(labels_df, args.data_folder)
+    spreadsheet_reader = SpreadsheetReader()
+
+    # table_feature_maps = extract_feature_maps_from_labels(labels_df, args.data_folder)
+    tables,  backgrounds = spreadsheet_reader.load_dataset_maps(labels_df, args.data_folder)
 
     device = get_device()
 
-    train_dataset = SpreadsheetDataset(table_feature_maps, device)
-    test_dataset = SpreadsheetDataset(table_feature_maps, device)
+    train_dataset = SpreadsheetDataset(tables, backgrounds, device)
+    test_dataset = SpreadsheetDataset(tables, backgrounds, device)
 
 
     batch_size = args.batch_size  # For different-sized inputs

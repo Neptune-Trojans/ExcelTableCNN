@@ -2,39 +2,27 @@ import torch
 from torch.utils.data import Dataset
 import random
 
-from excel_table_cnn.train_test_helpers.cell_features import generate_feature_tensor
-
 
 class SpreadsheetDataset(Dataset):
-    def __init__(self, feature_maps: list, device):
-        # self.tensors = tensors
-        # self.num_cell_features = tensors.num_cell_features
+    def __init__(self, tables: list,  backgrounds:list, device):
         self._device = device
 
         self._epoch_iterations = 1000
 
-        self._feature_maps = feature_maps
-        self._feature_maps_shapes = [tensor.shape for tensor in feature_maps]
-        self._h_max = max(tensor.shape[0] for tensor in feature_maps)
-        self._w_max = max(tensor.shape[1] for tensor in feature_maps)
+        self._tables = [torch.tensor(table, dtype=torch.float32, device=self._device) for table in tables]
 
-        self._pairs = [self._generate_valid_pairs() for _ in range(1000)]
+        self._backgrounds = backgrounds
+        self._backgrounds = [torch.tensor(background, dtype=torch.float32, device=self._device) for background in backgrounds]
 
+        self._h_max = max(tensor.shape[0] for tensor in self._tables)
+        self._w_max = max(tensor.shape[1] for tensor in self._tables)
 
     def __len__(self):
         # The length of the dataset is the number of spreadsheets
         return self._epoch_iterations
 
-
-    def _generate_valid_pairs(self):
-        H = 400
-        W = 400
-
-        return H, W
-
-    def tile_matrix_randomly(self, map_tensor, max_tiles=10, max_attempts=50):
-        H, W, C = map_tensor.shape
-
+    def tile_matrix_randomly(self, background, max_tiles=10, max_attempts=50):
+        H, W, _ = background.shape
 
         # Initialize ID map to track which tile occupies each location
         id_map = torch.zeros(H, W, dtype=torch.long, device=self._device)
@@ -44,9 +32,9 @@ class SpreadsheetDataset(Dataset):
         tile_id = 1  # Start tile IDs from 1
 
         while len(locations) < max_tiles and attempts < max_attempts:
-            tile_idx = random.randint(0, len(self._feature_maps) - 1)
-            tile = self._feature_maps[tile_idx]
-            h, w, _ = self._feature_maps_shapes[tile_idx]
+            tile_idx = random.randint(0, len(self._tables) - 1)
+            tile = self._tables[tile_idx]
+            h, w, _ = tile.shape
             h1 = random.randint(h, H)
             w1 = random.randint(w, W)
 
@@ -59,7 +47,7 @@ class SpreadsheetDataset(Dataset):
 
             # Check if area is untiled (all zeros)
             if torch.all(id_map[y1:y2, x1:x2] == 0):
-                map_tensor[y1:y2, x1:x2, :] = new_tile
+                background[y1:y2, x1:x2, :] = new_tile
                 locations.append((x1, y1, x2, y2))
                 #id_map[y1:y2, x1:x2] = tile_id  # Assign tile ID
                 self.assign_tile_with_border(id_map, y1, y2, x1, x2, tile_id)
@@ -116,13 +104,11 @@ class SpreadsheetDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        H, W = self._pairs[idx]
-        # tensor = torch.zeros(H, W, 17, device=self._device)
-        # tensor[:, :, 0] = 1.0
+        background_idx = random.randint(0, len(self._backgrounds) - 1)
 
-        tensor = generate_feature_tensor(H, W, device=self._device)
+        background_map = self._backgrounds[background_idx]
 
-        locations = self.tile_matrix_randomly(tensor)
+        locations = self.tile_matrix_randomly(background_map)
         box_classes = [1]* len(locations)
 
         labels = {'boxes': torch.tensor(locations, dtype=torch.float32, device=self._device),
@@ -130,6 +116,6 @@ class SpreadsheetDataset(Dataset):
 
         #tensor = self.tensors.hwc_tensors[idx]
         # Permute tensor to C x H x W
-        tensor = tensor.permute(2, 0, 1)
+        tensor = background_map.permute(2, 0, 1)
 
         return tensor, labels

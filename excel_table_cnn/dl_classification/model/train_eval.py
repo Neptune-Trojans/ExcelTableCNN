@@ -84,6 +84,8 @@ def evaluate_model(model, test_loader, device, iou_threshold=0.5, conf_score=0.3
             metric.update(preds, targets)
 
     results = metric.compute()
+
+    wandb.log({f"val/{k}": v.item() if hasattr(v, 'item') else v for k, v in results.items()})
     print(results)
 
 

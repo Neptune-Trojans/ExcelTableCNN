@@ -83,10 +83,9 @@ if __name__ == '__main__':
         project="synthetic-table-detector",
         name=run_name,  # optional
         config={
-            "learning_rate": 0.0005,
-            "epochs": 30,
-            "batch_size": 8,
-            "optimizer": "SGD",
+            "learning_rate": args.learning_rate,
+            "epochs": args.epochs_number,
+            "batch_size": batch_size,
         }
     )
     train_model(model, train_loader, optimizer,scheduler, args.epochs_number, device)

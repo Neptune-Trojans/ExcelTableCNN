@@ -1,24 +1,18 @@
-import ast
 import argparse
+import ast
 import os
+from datetime import datetime
 
 import pandas as pd
 import torch
+import torch.optim as optim
 import wandb
-from openpyxl.utils import range_boundaries
 from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
-import torch.optim as optim
-from datetime import datetime
 
 from excel_table_cnn.dl_classification.model.train_eval import get_model, train_model, evaluate_model
 from excel_table_cnn.dl_classification.spreadsheet_dataset import SpreadsheetDataset
-from excel_table_cnn.dl_classification.tensors import DataframeTensors
-from excel_table_cnn.train_test_helpers import get_table_features
-from excel_table_cnn.train_test_helpers.cell_features import get_table_features2, extract_feature_maps_from_labels
 from excel_table_cnn.train_test_helpers.spreadsheet_reader import SpreadsheetReader
-from excel_table_cnn.train_test_helpers.train_test_composer import get_train_test
-from excel_table_cnn.train_test_helpers.utils import compute_feature_map_aspect_ratios
 
 data_folder_path = 'data'
 

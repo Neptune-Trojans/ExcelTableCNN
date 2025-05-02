@@ -76,11 +76,13 @@ def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
         # Step the scheduler at the end of each epoch
         scheduler.step()
 
-        print(f"Epoch {epoch}: Loss: {epoch_loss / len(train_loader)} lr: {scheduler.get_last_lr()[0]}")
-        print(f"Epoch {epoch}: Avg Total Loss: {epoch_loss / len(train_loader):.6f} lr: {scheduler.get_last_lr()[0]:.6f}")
-        for key in loss_sums:
-            avg_component = loss_sums[key] / len(train_loader)
-            print(f"    Avg {key}: {avg_component:.6f}")
+
+        avg_loss_values_str = " | ".join([f"{name}: {value / len(train_loader):.4f}" for name, value in loss_sums.items()])
+        avg_total = epoch_loss / len(train_loader)
+        lr = scheduler.get_last_lr()[0]
+
+        print(f"[Epoch {epoch}] {avg_loss_values_str} | total: {avg_total:.4f} | lr: {lr:.6f}")
+
 
 
 def evaluate_model(model, test_loader, device, iou_threshold=0.5, conf_score=0.3):

@@ -92,4 +92,5 @@ if __name__ == '__main__':
 
     torch.save(model.state_dict(), os.path.join(args.output_folder, 'weights.pt'))
     evaluate_model(model, test_loader, device)
+
     wandb.finish()

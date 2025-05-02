@@ -1,10 +1,10 @@
 import torch
+import wandb
 from torch.utils.data import DataLoader
 from collections import defaultdict
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
 from .model4 import FasterRCNNMobileNetMapped2
-
 
 
 def get_model(in_channels=2):
@@ -59,6 +59,12 @@ def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
         lr = scheduler.get_last_lr()[0]
 
         print(f"[Epoch {epoch}] {avg_loss_values_str} | total: {avg_total:.4f} | lr: {lr:.6f}")
+        wandb.log({
+            "epoch": epoch,
+            "train/loss_total": avg_total,
+            **{f"train/{k}": v for k, v in loss_sums.items()},
+            "lr": scheduler.get_last_lr()[0],
+        })
 
 
 

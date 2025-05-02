@@ -4,10 +4,12 @@ import os
 
 import pandas as pd
 import torch
+import wandb
 from openpyxl.utils import range_boundaries
 from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
 import torch.optim as optim
+from datetime import datetime
 
 from excel_table_cnn.dl_classification.model.train_eval import get_model, train_model, evaluate_model
 from excel_table_cnn.dl_classification.spreadsheet_dataset import SpreadsheetDataset
@@ -48,6 +50,8 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, help='batch size')
     parser.add_argument('--learning_rate', type=float, default=1e-5, help='batch size')
 
+    run_name = f"run-{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+
     args = parser.parse_args()
 
     init_dataframe_view()
@@ -74,7 +78,19 @@ if __name__ == '__main__':
 
     optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=0.9, weight_decay=0.0001)
     scheduler = MultiStepLR(optimizer, milestones=[10, 20, 40], gamma=0.1)
+
+    wandb.init(
+        project="synthetic-table-detector",
+        name=run_name,  # optional
+        config={
+            "learning_rate": 0.0005,
+            "epochs": 30,
+            "batch_size": 8,
+            "optimizer": "SGD",
+        }
+    )
     train_model(model, train_loader, optimizer,scheduler, args.epochs_number, device)
 
     torch.save(model.state_dict(), os.path.join(args.output_folder, 'weights.pt'))
     evaluate_model(model, test_loader, device)
+    wandb.finish()

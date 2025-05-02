@@ -62,7 +62,7 @@ def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
         wandb.log({
             "epoch": epoch,
             "train/loss_total": avg_total,
-            **{f"train/{k}": v for k, v in loss_sums.items()},
+            **{f"train/{k}": v / len(train_loader)  for k, v in loss_sums.items()},
             "lr": scheduler.get_last_lr()[0],
         })
 

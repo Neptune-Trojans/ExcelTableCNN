@@ -33,6 +33,7 @@ def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
 
     for epoch in range(num_epochs):
         epoch_loss = 0
+        loss_sums = defaultdict(float)
         for images, targets in train_loader:
             # images = [image.to(device) for image in images]
 
@@ -65,6 +66,8 @@ def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
             losses = sum(loss for loss in loss_dict.values())
 
             epoch_loss += losses.item()
+            for key, value in loss_dict.items():
+                loss_sums[key] += value.item()
 
             # Backpropagation
             losses.backward()
@@ -74,6 +77,10 @@ def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
         scheduler.step()
 
         print(f"Epoch {epoch}: Loss: {epoch_loss / len(train_loader)} lr: {scheduler.get_last_lr()[0]}")
+        print(f"Epoch {epoch}: Avg Total Loss: {epoch_loss / len(train_loader):.6f} lr: {scheduler.get_last_lr()[0]:.6f}")
+        for key in loss_sums:
+            avg_component = loss_sums[key] / len(train_loader)
+            print(f"    Avg {key}: {avg_component:.6f}")
 
 
 def evaluate_model(model, test_loader, device, iou_threshold=0.5, conf_score=0.3):

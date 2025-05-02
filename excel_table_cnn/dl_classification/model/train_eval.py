@@ -31,26 +31,7 @@ def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
         epoch_loss = 0
         loss_sums = defaultdict(float)
         for images, targets in train_loader:
-        #     # images = [image.to(device) for image in images]
-        #
-        #     # Get max height and width
-        #     max_h = max(img.shape[1] for img in images)
-        #     max_w = max(img.shape[2] for img in images)
-        #     c = images[0].shape[0]
-        #
-        #     padded = []
-        #     for img in images:
-        #
-        #         # padded_img = torch.zeros(c, max_h, max_w, device=device, dtype=img.dtype)
-        #         # padded_img[0, :, :] = 1.0
-        #
-        #         padded_img = generate_feature_tensor(max_h, max_w, device=device)
-        #         padded_img = padded_img.permute(2, 0, 1)
-        #
-        #         padded_img[:, :img.shape[1], :img.shape[2]] = img
-        #         padded.append(padded_img)
-        #
-        #     images = padded
+
             targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
             # Reset gradients

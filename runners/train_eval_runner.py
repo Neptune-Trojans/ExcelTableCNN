@@ -50,7 +50,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-
     init_dataframe_view()
 
     model = get_model(17)

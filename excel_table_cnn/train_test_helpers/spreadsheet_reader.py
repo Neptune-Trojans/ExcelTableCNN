@@ -43,7 +43,7 @@ class SpreadsheetReader:
         tables_features = []
         for table_area in tables_area:
             min_col, min_row, max_col, max_row = parse_table_range(table_area)
-            if min_col > W or min_row > H:
+            if min_col >= W or min_row >= H:
                 continue
             table_slice = sheet_tensor[min_row:max_row, min_col:max_col].copy()
             h, w, c = table_slice.shape

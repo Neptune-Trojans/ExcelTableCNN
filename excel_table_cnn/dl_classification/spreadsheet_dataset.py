@@ -37,8 +37,13 @@ class SpreadsheetDataset(Dataset):
             min_tile_size = 2
             h1 = random.randint(max(h, min_tile_size), H)
             w1 = random.randint(max(w, min_tile_size), W)
-
-            new_tile = self.resize_with_row_col_copy(tile, h1, w1)
+            try:
+                new_tile = self.resize_with_row_col_copy(tile, h1, w1)
+            except Exception as e:
+                print(tile.shape)
+                print(h1)
+                print(w1)
+                raise ValueError(f"Invalid range {e}")
 
             y1 = random.randint(0, H - h1)
             x1 = random.randint(0, W - w1)

@@ -9,8 +9,10 @@ from excel_table_cnn.train_test_helpers.cell_features import feature_order, get_
 
 
 class SpreadsheetReader:
-    def __init__(self, ):
+    def __init__(self, width, height):
         self._num_cell_features = 17
+        self._map_width = width
+        self._map_height = height
         self._empty_cell = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
     def read_spreadsheet(self, file_path, sheet_name, tables_area):
@@ -18,11 +20,11 @@ class SpreadsheetReader:
         ws = wb[sheet_name]
 
         min_row = 1
-        max_row = ws.max_row
+        max_row = min(ws.max_row, self._map_height)
         min_col = 1
-        max_col = ws.max_column
+        max_col = min(ws.max_column, self._map_width)
 
-        sheet_tensor = np.zeros((max_row + 1, max_col + 1, self._num_cell_features), dtype=np.float32)
+        sheet_tensor = np.zeros((max_row, max_col, self._num_cell_features), dtype=np.float32)
 
         for row_idx, row in enumerate(ws.iter_rows(min_row=min_row, max_row=max_row, min_col=min_col, max_col=max_col)):
             for col_idx, cell in enumerate(row):
@@ -72,17 +74,22 @@ class SpreadsheetReader:
 
         return tables,  backgrounds
 
-    def pad_feature_map(self, feature_map, max_height=640, max_width=640):
-
+    def pad_feature_map(self, feature_map):
         h, w, d = feature_map.shape
-        if h > max_height or w > max_width:
-            raise ValueError(f"Feature map is too large to fit in {max_height}x{max_width} canvas")
+
+        # Clip dimensions if they exceed max limits
+        clipped_h = min(h, self._map_height)
+        clipped_w = min(w, self._map_width)
+
+        # Optionally log or warn if clipping occurs
+        if h > self._map_height or w > self._map_width:
+            print(f"Warning: Feature map clipped from ({h}, {w}) to ({clipped_h}, {clipped_w})")
 
         # Create padded map filled with _empty_cell values
-        resized_map = np.tile(self._empty_cell, (max_height, max_width, 1))
+        resized_map = np.tile(self._empty_cell, (self._map_height, self._map_width, 1))
 
-        # Copy the original map into the top-left corner
-        resized_map[:h, :w, :] = feature_map
+        # Copy the valid portion of the original map into the top-left corner
+        resized_map[:clipped_h, :clipped_w, :] = feature_map[:clipped_h, :clipped_w, :]
 
         return resized_map
 

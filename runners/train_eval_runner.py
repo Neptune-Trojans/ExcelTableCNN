@@ -55,7 +55,7 @@ if __name__ == '__main__':
     labels_df = pd.read_csv(args.labels_file)
     labels_df['table_region'] = labels_df['table_region'].apply(ast.literal_eval)
 
-    spreadsheet_reader = SpreadsheetReader()
+    spreadsheet_reader = SpreadsheetReader(640, 640)
 
     # table_feature_maps = extract_feature_maps_from_labels(labels_df, args.data_folder)
     tables,  backgrounds = spreadsheet_reader.load_dataset_maps(labels_df, args.data_folder)

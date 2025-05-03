@@ -41,6 +41,7 @@ class SpreadsheetDataset(Dataset):
                 new_tile = self.resize_with_row_col_copy(tile, h1, w1)
             except Exception as e:
                 print(tile.shape)
+                print(tile_idx)
                 print(h1)
                 print(w1)
                 raise ValueError(f"Invalid range {e}")

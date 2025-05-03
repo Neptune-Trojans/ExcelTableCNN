@@ -7,8 +7,8 @@ from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from .model4 import FasterRCNNMobileNetMapped2
 
 
-def get_model(in_channels=2):
-    model = FasterRCNNMobileNetMapped2(input_channels=in_channels, num_classes=2)
+def get_model(in_channels=2, max_height=200, max_width=200):
+    model = FasterRCNNMobileNetMapped2(input_channels=in_channels, num_classes=2, image_size=(max_height, max_width))
     return model
 
 

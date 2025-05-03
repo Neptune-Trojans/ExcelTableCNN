@@ -49,9 +49,11 @@ if __name__ == '__main__':
 
     init_dataframe_view()
 
-    model = get_model(17)
+    image_height, image_width = (300, 300)
 
-    dataset_manager = DatasetManager(args.dataset_yaml)
+    model = get_model(17, image_height, image_width)
+
+    dataset_manager = DatasetManager(args.dataset_yaml, image_height, image_width)
     tables, backgrounds = dataset_manager.load_datasets()
 
     device = get_device()

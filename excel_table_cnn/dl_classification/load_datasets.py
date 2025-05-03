@@ -7,14 +7,14 @@ from excel_table_cnn.train_test_helpers.spreadsheet_reader import SpreadsheetRea
 
 
 class DatasetManager:
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: str, height, width):
         """
         Initialize the DatasetManager with a path to the YAML config file.
         Loads dataset configurations into memory.
         """
         self.config_path = config_path
         self.datasets = self._load_config()
-        self._spreadsheet_reader = SpreadsheetReader(640, 640)
+        self._spreadsheet_reader = SpreadsheetReader(width=width, height=height)
 
     def _load_config(self) -> dict:
         """

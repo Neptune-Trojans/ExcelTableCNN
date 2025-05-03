@@ -39,10 +39,16 @@ class SpreadsheetReader:
 
     def separate_tables_data(self, sheet_tensor, tables_area):
         background_features = sheet_tensor.copy()
+        H, W, _ = background_features.shape
         tables_features = []
         for table_area in tables_area:
             min_col, min_row, max_col, max_row = parse_table_range(table_area)
+            if min_col > W or min_row > H:
+                continue
             table_slice = sheet_tensor[min_row:max_row, min_col:max_col].copy()
+            h, w, c = table_slice.shape
+            if h == 0 or w == 0:
+                raise ValueError(f"Table slice has zero height or width: shape {table_slice.shape}")
             tables_features.append(table_slice)
             height, width = table_slice.shape[:2]
 

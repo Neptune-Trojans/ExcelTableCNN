@@ -18,8 +18,17 @@ def parse_table_range(table_range):
     # Convert table range string to numerical coordinates
     # Placeholder for actual implementation
     min_col, min_row, max_col, max_row = range_boundaries(table_range)
-    # Match the R-CNN convention: x_min, y_min, x_max, y_max
-    return [min_col - 1, min_row - 1, max_col - 1, max_row - 1]
+    x_min = min_col - 1
+    y_min = min_row - 1
+    x_max = max_col - 1
+    y_max = max_row - 1
+
+    if x_min >= x_max or y_min >= y_max:
+        raise ValueError(
+            f"Table range '{table_range}' has zero or negative size: "
+            f"(columns {x_min}–{x_max}, rows {y_min}–{y_max})"
+        )
+    return [x_min, y_min, x_max, y_max]
 
 
 def preprocess_features(row):

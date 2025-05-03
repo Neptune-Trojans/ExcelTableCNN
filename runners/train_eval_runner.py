@@ -12,6 +12,7 @@ from torch.utils.data import DataLoader
 from excel_table_cnn.dl_classification.load_datasets import DatasetManager
 from excel_table_cnn.dl_classification.model.train_eval import get_model, train_model, evaluate_model
 from excel_table_cnn.dl_classification.spreadsheet_dataset import SpreadsheetDataset
+from excel_table_cnn.train_test_helpers.utils import get_device
 
 data_folder_path = 'data'
 
@@ -24,13 +25,7 @@ def collate_fn(batch):
     return tuple(zip(*batch))
 
 
-def get_device() -> torch.device:
-    if torch.cuda.is_available():
-        return torch.device("cuda")
-    elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
-        return torch.device("mps")
-    else:
-        return torch.device("cpu")
+
 
 
 if __name__ == '__main__':

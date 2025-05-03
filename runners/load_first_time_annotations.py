@@ -26,5 +26,5 @@ if __name__ == '__main__':
 
     data_folder = '/Users/arito/.arito/Applications/excel_files_scraping'
 
-    spreadsheet_reader = SpreadsheetReader(640,640)
+    spreadsheet_reader = SpreadsheetReader(400,400)
     tables, backgrounds = spreadsheet_reader.load_dataset_maps(labels_df, data_folder)

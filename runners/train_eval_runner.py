@@ -1,5 +1,4 @@
 import argparse
-import ast
 import os
 from datetime import datetime
 
@@ -10,9 +9,9 @@ import wandb
 from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
 
+from excel_table_cnn.dl_classification.load_datasets import DatasetManager
 from excel_table_cnn.dl_classification.model.train_eval import get_model, train_model, evaluate_model
 from excel_table_cnn.dl_classification.spreadsheet_dataset import SpreadsheetDataset
-from excel_table_cnn.train_test_helpers.spreadsheet_reader import SpreadsheetReader
 
 data_folder_path = 'data'
 
@@ -36,8 +35,8 @@ def get_device() -> torch.device:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Do all the things')
-    parser.add_argument('--labels_file', type=str, help='file with the labels')
-    parser.add_argument('--data_folder', type=str, help='excel files folder')
+    parser.add_argument('--dataset_yaml', type=str, help='dataset yaml')
+
 
     parser.add_argument('--output_folder', type=str, help='output folder')
     parser.add_argument('--epochs_number', type=int, help='number of epochs')
@@ -52,13 +51,8 @@ if __name__ == '__main__':
 
     model = get_model(17)
 
-    labels_df = pd.read_csv(args.labels_file)
-    labels_df['table_region'] = labels_df['table_region'].apply(ast.literal_eval)
-
-    spreadsheet_reader = SpreadsheetReader(640, 640)
-
-    # table_feature_maps = extract_feature_maps_from_labels(labels_df, args.data_folder)
-    tables,  backgrounds = spreadsheet_reader.load_dataset_maps(labels_df, args.data_folder)
+    dataset_manager = DatasetManager(args.dataset_yaml)
+    tables, backgrounds = dataset_manager.load_datasets()
 
     device = get_device()
 

@@ -2,6 +2,8 @@ import os
 
 import numpy as np
 import openpyxl
+import torch
+from openpyxl.styles.builtins import output
 from tqdm import tqdm
 
 from excel_table_cnn.dl_classification.tensors import parse_table_range
@@ -9,11 +11,19 @@ from excel_table_cnn.train_test_helpers.cell_features import feature_order, get_
 
 
 class SpreadsheetReader:
-    def __init__(self, width, height):
+    def __init__(self, width, height, features_cache_folder):
         self._num_cell_features = 17
         self._map_width = width
         self._map_height = height
+        self._features_cache_folder = features_cache_folder
         self._empty_cell = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+
+
+    def processed_file_name(self, file_name: str, spreadsheet_name: str) -> str:
+        base_name = os.path.splitext(file_name)[0]
+        output_path = os.path.join(self._features_cache_folder, f"{base_name}__{spreadsheet_name}.pt")
+        return output_path
+
 
     def read_spreadsheet(self, file_path, sheet_name, tables_area):
         wb = openpyxl.load_workbook(file_path)
@@ -32,10 +42,12 @@ class SpreadsheetReader:
                 feature_matrix = np.array([float(features[key]) for key in feature_order], dtype=np.float32)
                 sheet_tensor[row_idx, col_idx] = feature_matrix
 
+        gt_tables = np.array([parse_table_range(area) for area in tables_area], dtype=np.int64)
+        # Convert to torch tensors
+        sheet_tensor = torch.from_numpy(sheet_tensor)  # shape: (H, W, F)
+        gt_tables = torch.from_numpy(gt_tables)  # shape: (N, 4)
 
-        tables_features, background_features = self.separate_tables_data(sheet_tensor, tables_area)
-
-        return tables_features, background_features
+        return sheet_tensor, gt_tables
 
     def separate_tables_data(self, sheet_tensor, tables_area):
         background_features = sheet_tensor.copy()
@@ -67,18 +79,22 @@ class SpreadsheetReader:
         Returns:
             List[Tensor]: A list of feature maps extracted from the dataset
         """
-        tables,  backgrounds = [], []
+        #tables,  backgrounds = [], []
 
         for _, row in tqdm(labels_df.iterrows(), total=len(labels_df), desc="Processing sheets"):
             sheet_name = row['sheet_name']
             file_path = os.path.join(data_folder, row['file_path'])
+            print(file_path)
+            sheet_tensor, gt_tables = self.read_spreadsheet(file_path, sheet_name, row['table_region'])
 
-            tables_features, background_features = self.read_spreadsheet(file_path, sheet_name, row['table_region'])
-            tables.extend(tables_features)
-            background_features = self.pad_feature_map(background_features)
-            backgrounds.append(background_features)
+            save_data = {
+                "sheet_tensor": sheet_tensor,
+                "gt_tables": gt_tables
+            }
 
-        return tables,  backgrounds
+            output_path = self.processed_file_name(row['file_path'], sheet_name)
+            torch.save(save_data, output_path)
+
 
     def pad_feature_map(self, feature_map):
         h, w, d = feature_map.shape

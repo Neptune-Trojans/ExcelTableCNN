@@ -1,4 +1,5 @@
 import argparse
+import ast
 import os
 from datetime import datetime
 
@@ -12,6 +13,7 @@ from torch.utils.data import DataLoader
 from excel_table_cnn.dl_classification.load_datasets import DatasetManager
 from excel_table_cnn.dl_classification.model.train_eval import get_model, train_model, evaluate_model
 from excel_table_cnn.dl_classification.spreadsheet_dataset import SpreadsheetDataset
+from excel_table_cnn.train_test_helpers.spreadsheet_reader import SpreadsheetReader
 from excel_table_cnn.train_test_helpers.utils import get_device
 
 data_folder_path = 'data'
@@ -29,32 +31,43 @@ def collate_fn(batch):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Do all the things')
-    parser.add_argument('--dataset_yaml', type=str, help='dataset yaml')
-
+    parser = argparse.ArgumentParser(description='Training configuration')
+    parser.add_argument('--annotations_csv_file', type=str, help='annotations csv file')
+    parser.add_argument('--preprocessed_folder', type=str, help='preprocessed files path')
 
     parser.add_argument('--output_folder', type=str, help='output folder')
-    parser.add_argument('--epochs_number', type=int, help='number of epochs')
-    parser.add_argument('--batch_size', type=int, help='batch size')
+
+    parser.add_argument('--epochs_number', type=int, default=1, help='number of epochs')
+    parser.add_argument('--batch_size', type=int, default=1, help='batch size')
     parser.add_argument('--learning_rate', type=float, default=1e-5, help='batch size')
+    args = parser.parse_args()
+
+    labels_df = pd.read_csv(args.annotations_csv_file)
+    labels_df['table_region'] = labels_df['table_region'].apply(ast.literal_eval)
 
     run_name = f"run-{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
 
-    args = parser.parse_args()
+    train_df = labels_df.iloc[:1000].copy()
+    val_df = labels_df.iloc[1000:].copy()
+
 
     init_dataframe_view()
-
-    image_height, image_width = (300, 300)
-
-    model = get_model(17, image_height, image_width)
-
-    dataset_manager = DatasetManager(args.dataset_yaml, image_height, image_width)
-    tables, backgrounds = dataset_manager.load_datasets()
-
     device = get_device()
+    height, width = (300, 300)
 
-    train_dataset = SpreadsheetDataset(tables, backgrounds, device)
-    test_dataset = SpreadsheetDataset(tables, backgrounds, device)
+    model = get_model(17, height, width)
+    model = model.to(device=device)
+
+    #dataset_manager = DatasetManager(args.dataset_yaml, image_height, image_width)
+    #tables, backgrounds = dataset_manager.load_datasets()
+
+
+
+    sp_reader = SpreadsheetReader(width, height, args.preprocessed_folder)
+
+    train_dataset = SpreadsheetDataset(train_df, args.batch_size, sp_reader, device)
+    test_dataset = SpreadsheetDataset(val_df, args.batch_size, sp_reader, device)
+
 
 
     batch_size = args.batch_size  # For different-sized inputs

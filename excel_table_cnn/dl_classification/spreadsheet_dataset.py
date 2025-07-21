@@ -1,23 +1,30 @@
+import pandas as pd
 import torch
 from torch.utils.data import Dataset
 import random
 
+from excel_table_cnn.train_test_helpers.spreadsheet_reader import SpreadsheetReader
+
 
 class SpreadsheetDataset(Dataset):
-    def __init__(self, tables: list,  backgrounds:list, device):
+    def __init__(self, labels_df: pd.DataFrame, batch_size: int, sp_reader: SpreadsheetReader, device: torch.device):
         self._device = device
 
         self._epoch_iterations = 1000
+        self._labels_df = labels_df
+        self._batch_size = batch_size
+        self._sp_reader = sp_reader
 
-        self._tables = [torch.tensor(table, dtype=torch.float32, device=self._device) for table in tables]
-        self._backgrounds = [torch.tensor(background, dtype=torch.float32, device=self._device) for background in backgrounds]
+        #self._tables = [torch.tensor(table, dtype=torch.float32, device=self._device) for table in tables]
+        #self._backgrounds = [torch.tensor(background, dtype=torch.float32, device=self._device) for background in backgrounds]
 
-        self._h_max = max(tensor.shape[0] for tensor in self._tables)
-        self._w_max = max(tensor.shape[1] for tensor in self._tables)
+        #self._h_max = max(tensor.shape[0] for tensor in self._tables)
+        #self._w_max = max(tensor.shape[1] for tensor in self._tables)
+
 
     def __len__(self):
         # The length of the dataset is the number of spreadsheets
-        return self._epoch_iterations
+        return min(self._epoch_iterations, len(self._labels_df) // self._batch_size)
 
     def tile_matrix_randomly(self, background, max_tiles=10, max_attempts=50):
         H, W, _ = background.shape
@@ -108,20 +115,51 @@ class SpreadsheetDataset(Dataset):
 
         return new_matrix
 
+    def pad_feature_map(self, feature_map: torch.Tensor, device: torch.device) -> torch.Tensor:
+        """
+        Pad or clip a (H, W, D) feature map tensor to (_map_height, _map_width, D)
+        using _empty_cell values as the background fill.
+        """
+        h, w, d = feature_map.shape
+
+        # Clip dimensions to max allowed
+        clipped_h = min(h, self._sp_reader._map_height)
+        clipped_w = min(w, self._sp_reader._map_width)
+
+        # Optionally warn about clipping
+        if h > self._sp_reader._map_height or w > self._sp_reader._map_width:
+            print(f"Warning: Feature map clipped from ({h}, {w}) to ({clipped_h}, {clipped_w})")
+
+        # Create a new tensor filled with _empty_cell values
+        empty_cell = torch.tensor(self._sp_reader._empty_cell, dtype=feature_map.dtype, device=device)
+        resized_map = empty_cell.expand(self._sp_reader._map_height, self._sp_reader._map_width, d).clone()
+
+        # Copy valid region into the resized map
+        resized_map[:clipped_h, :clipped_w, :] = feature_map[:clipped_h, :clipped_w, :]
+
+        return resized_map
+
     def __getitem__(self, idx):
+        row = self._labels_df.iloc[idx]
+        file_name = self._sp_reader.processed_file_name(row['file_path'], row['sheet_name'])
+        feature_map = torch.load(file_name)
 
-        background_idx = random.randint(0, len(self._backgrounds) - 1)
+        boxes = feature_map['gt_tables']
+        feature_map = feature_map['sheet_tensor']
 
-        background_map = self._backgrounds[background_idx].clone()
+        # background_idx = random.randint(0, len(self._backgrounds) - 1)
 
-        locations = self.tile_matrix_randomly(background_map)
-        box_classes = [1]* len(locations)
+        # background_map = self._backgrounds[background_idx].clone()
 
-        labels = {'boxes': torch.tensor(locations, dtype=torch.float32, device=self._device),
+        # locations = self.tile_matrix_randomly(background_map)
+        box_classes = [1] * len(boxes)
+
+        labels = {'boxes': boxes.clone().detach().to(dtype=torch.float32, device=self._device),
                   'labels': torch.tensor(box_classes, dtype=torch.int64, device=self._device)}
 
         #tensor = self.tensors.hwc_tensors[idx]
         # Permute tensor to C x H x W
-        tensor = background_map.permute(2, 0, 1)
+        feature_map = self.pad_feature_map(feature_map, device=self._device)
+        tensor = feature_map.permute(2, 0, 1)
 
         return tensor, labels

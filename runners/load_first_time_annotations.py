@@ -1,3 +1,4 @@
+import argparse
 import ast
 import pandas as pd
 
@@ -6,13 +7,16 @@ from runners.train_eval_runner import init_dataframe_view
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Training configuration')
+    parser.add_argument('--annotations_csv_file', type=str, help='annotations csv file')
+    parser.add_argument('--spreadsheets_folder', type=str, help='preprocessed files path')
+    parser.add_argument('--output_folder', type=str, help='preprocessed files path')
+
+    args = parser.parse_args()
+
     init_dataframe_view()
-    labels_df = pd.read_csv('/Users/arito/Data/anotation_data_outsoursing/image_annotations_to_spreadsheet/table_labels.csv')
+    labels_df = pd.read_csv(args.annotations_csv_file)
     labels_df['table_region'] = labels_df['table_region'].apply(ast.literal_eval)
 
-    data_folder = '/Users/arito/Data/spreadsheets_pool'
-
-    features_output_folder = '/Users/arito/.arito/Applications/excel_table_train'
-
-    spreadsheet_reader = SpreadsheetReader(300,300, features_output_folder)
-    spreadsheet_reader.load_dataset_maps(labels_df, data_folder)
+    spreadsheet_reader = SpreadsheetReader(300,300, args.output_folder)
+    spreadsheet_reader.load_dataset_maps(labels_df, args.spreadsheets_folder)

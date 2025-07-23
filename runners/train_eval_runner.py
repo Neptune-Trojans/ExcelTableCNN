@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     run_name = f"run-{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
 
-    train_df = labels_df.iloc[500:].copy()
+    train_df = labels_df.iloc[500:1000].copy()
     val_df = labels_df.iloc[:500].copy()
 
 

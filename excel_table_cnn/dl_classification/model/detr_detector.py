@@ -19,17 +19,15 @@ class DetrResNet18Mapped(nn.Module):
         )
 
 
-    def forward(self, x, targets):
-        """
-        Args:
-            x: Tensor of shape (B, 17, H, W)
-        Returns:
-            Output from DETR forward
-        """
+    def forward(self, x, targets=None):
+
         x = self.input_mapper(x)  # → (B, 3, H, W)
 
-        outputs = self.detr(pixel_values=x, labels=targets)
-        return outputs
+        if self.training:
+            return self.detector(x, targets)
+        else:
+            return self.detector(x)
+
 
 
 if __name__ == '__main__':

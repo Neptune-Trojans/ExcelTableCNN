@@ -15,7 +15,7 @@ class DetrResNet18Mapped(nn.Module):
         self.detr = DetrForObjectDetection.from_pretrained(
             "facebook/detr-resnet-50",
             num_labels=num_classes,
-            num_queries=10,
+            num_queries=20,
             ignore_mismatched_sizes=True  # If adjusting label space
         )
 

@@ -149,6 +149,10 @@ class SpreadsheetDataset(Dataset):
         boxes[:, [0, 2]] /= float(self._sp_reader._map_width)
         boxes[:, [1, 3]] /= float(self._sp_reader._map_height)
 
+        if torch.isnan(boxes).any():
+            print(row['file_path'])
+            print(row['sheet_name'])
+
         feature_map = feature_map['sheet_tensor']
 
         # background_idx = random.randint(0, len(self._backgrounds) - 1)

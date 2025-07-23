@@ -54,6 +54,8 @@ class FasterRCNNMobileNetMapped2(nn.Module):
         self.detector.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
 
     def forward(self, x, targets=None):
+        x = [(img - img.mean()) / (img.std() + 1e-6) for img in x]
+
         x = [self.channel_mapper(img) for img in x]
         if self.training:
             return self.detector(x, targets)

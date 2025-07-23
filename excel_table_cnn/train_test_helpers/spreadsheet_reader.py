@@ -3,7 +3,7 @@ import os
 import numpy as np
 import openpyxl
 import torch
-from openpyxl.styles.builtins import output
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
 from excel_table_cnn.dl_classification.tensors import parse_table_range
@@ -94,6 +94,39 @@ class SpreadsheetReader:
 
             output_path = self.processed_file_name(row['file_path'], sheet_name)
             torch.save(save_data, output_path)
+
+    def parallel_process_maps(self, labels_df, data_folder, max_workers=8):
+        """
+        Parallel version of load_dataset_maps using ThreadPoolExecutor.
+
+        Args:
+            labels_df (pd.DataFrame): DataFrame with columns ['sheet_name', 'file_path', 'table_region']
+            data_folder (str): Root folder where spreadsheet files are located
+            max_workers (int): Number of threads to use
+
+        Returns:
+            None (saves .pt files to disk)
+        """
+
+        def process_row(row):
+            sheet_name = row['sheet_name']
+            file_path = os.path.join(data_folder, row['file_path'])
+
+            sheet_tensor, gt_tables = self.read_spreadsheet(file_path, sheet_name, row['table_region'])
+            save_data = {
+                "sheet_tensor": sheet_tensor,
+                "gt_tables": gt_tables
+            }
+
+            output_path = self.processed_file_name(row['file_path'], sheet_name)
+            torch.save(save_data, output_path)
+            return output_path
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(process_row, row) for _, row in labels_df.iterrows()]
+
+            for _ in tqdm(as_completed(futures), total=len(futures), desc="Processing sheets"):
+                pass  # Results are saved to disk
 
 
     def pad_feature_map(self, feature_map):

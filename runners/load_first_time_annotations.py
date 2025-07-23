@@ -19,4 +19,5 @@ if __name__ == '__main__':
     labels_df['table_region'] = labels_df['table_region'].apply(ast.literal_eval)
 
     spreadsheet_reader = SpreadsheetReader(300,300, args.output_folder)
-    spreadsheet_reader.load_dataset_maps(labels_df, args.spreadsheets_folder)
+    #spreadsheet_reader.load_dataset_maps(labels_df, args.spreadsheets_folder)
+    spreadsheet_reader.parallel_process_maps(labels_df, args.spreadsheets_folder, max_workers=8)

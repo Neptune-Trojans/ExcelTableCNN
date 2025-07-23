@@ -11,6 +11,7 @@ if __name__ == '__main__':
     parser.add_argument('--annotations_csv_file', type=str, help='annotations csv file')
     parser.add_argument('--spreadsheets_folder', type=str, help='preprocessed files path')
     parser.add_argument('--output_folder', type=str, help='preprocessed files path')
+    parser.add_argument('--max_workers', int=str, default=8, help='preprocessed files path')
 
     args = parser.parse_args()
 
@@ -20,4 +21,4 @@ if __name__ == '__main__':
 
     spreadsheet_reader = SpreadsheetReader(300,300, args.output_folder)
     #spreadsheet_reader.load_dataset_maps(labels_df, args.spreadsheets_folder)
-    spreadsheet_reader.parallel_process_maps(labels_df, args.spreadsheets_folder, max_workers=8)
+    spreadsheet_reader.parallel_process_maps(labels_df, args.spreadsheets_folder, max_workers=args.max_workers)

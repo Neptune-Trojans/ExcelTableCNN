@@ -12,7 +12,10 @@ class FasterRCNNMobileNetMapped2(nn.Module):
     def __init__(self, input_channels, num_classes, image_size=(400, 400), pretrained=True):
         super().__init__()
 
-        self.channel_mapper = nn.Conv2d(input_channels, 3, kernel_size=1)
+        self.channel_mapper = nn.Sequential(
+            nn.Conv2d(input_channels, 3, kernel_size=1),
+            nn.ReLU()
+        )
 
         # Backbone with FPN
         backbone = mobilenet_backbone('mobilenet_v3_large', pretrained=pretrained, fpn=True)
@@ -23,8 +26,7 @@ class FasterRCNNMobileNetMapped2(nn.Module):
             sizes=tuple([(32,), (64,), (128,)]),
             #sizes=tuple([(16, 32), (64,), (128,)]),
             aspect_ratios=tuple([(0.1, 0.25, 0.5, 1.0, 2.0)] * len(featmap_keys))
-            #(0.5, 1.0, 2.0)
-            # (0.1, 0.25, 0.5, 1.0, 2.0)
+
         )
 
         # RoI Pooler — match feature map keys

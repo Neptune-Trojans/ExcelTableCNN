@@ -37,6 +37,7 @@ def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
 
             # Reset gradients
             optimizer.zero_grad()
+            images = torch.stack(images, dim=0)
 
             # Forward pass
             loss_dict = model(images, targets)

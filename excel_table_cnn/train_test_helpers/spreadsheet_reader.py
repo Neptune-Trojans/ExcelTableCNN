@@ -26,7 +26,7 @@ class SpreadsheetReader:
 
 
     def read_spreadsheet(self, file_path, sheet_name, tables_area):
-        wb = openpyxl.load_workbook(file_path, read_only=True)
+        wb = openpyxl.load_workbook(file_path)
         ws = wb[sheet_name]
 
         max_row = min(ws.max_row, self._map_height)
@@ -42,6 +42,7 @@ class SpreadsheetReader:
         for row_idx, row in enumerate(ws.iter_rows(min_row=1, max_row=max_row, min_col=1, max_col=max_col)):
             for col_idx, cell in enumerate(row):
                 features = get_cell_features_xlsx(cell)
+
                 for i, key in enumerate(feature_order):
                     feature_array[i] = float(features[key])
                 sheet_tensor[row_idx, col_idx] = feature_array

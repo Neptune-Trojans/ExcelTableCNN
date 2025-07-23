@@ -155,7 +155,7 @@ class SpreadsheetDataset(Dataset):
         box_classes = [1] * len(boxes)
 
         labels = {'boxes': boxes.clone().detach().to(dtype=torch.float32, device=self._device),
-                  'labels': torch.tensor(box_classes, dtype=torch.int64, device=self._device)}
+                  'class_labels': torch.tensor(box_classes, dtype=torch.int64, device=self._device)}
 
         #tensor = self.tensors.hwc_tensors[idx]
         # Permute tensor to C x H x W

@@ -19,17 +19,16 @@ class DetrResNet18Mapped(nn.Module):
         )
 
 
-    def forward(self, x, pixel_values_mask=None):
+    def forward(self, x, targets):
         """
         Args:
             x: Tensor of shape (B, 17, H, W)
         Returns:
             Output from DETR forward
         """
-        x = torch.stack(x, dim=0)
         x = self.input_mapper(x)  # → (B, 3, H, W)
 
-        outputs = self.detr(pixel_values=x, pixel_mask=pixel_values_mask)
+        outputs = self.detr(pixel_values=x, labels=targets)
         return outputs
 
 

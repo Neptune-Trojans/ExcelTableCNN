@@ -4,11 +4,12 @@ from torch.utils.data import DataLoader
 from collections import defaultdict
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
-from excel_table_cnn.dl_classification.model.model4 import FasterRCNNMobileNetMapped2
+from excel_table_cnn.dl_classification.model.detr_detector import DetrResNet18Mapped
 
 
 def get_model(in_channels=2, max_height=200, max_width=200):
-    model = FasterRCNNMobileNetMapped2(input_channels=in_channels, num_classes=2, image_size=(max_height, max_width))
+    #model = FasterRCNNMobileNetMapped2(input_channels=in_channels, num_classes=2, image_size=(max_height, max_width))
+    model = DetrResNet18Mapped(num_classes=2)
     return model
 
 

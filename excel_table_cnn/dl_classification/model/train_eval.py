@@ -40,11 +40,14 @@ def train_model(model, train_loader, optimizer, scheduler, num_epochs, device):
             images = torch.stack(images, dim=0)
 
             # Forward pass
-            loss_dict = model(images, targets)
+            result = model(images, targets)
+            loss_dict = result.loss_dict
+            losses = sum(loss for key, loss in loss_dict.items() if key.startswith('loss_'))
 
-            losses = sum(loss for loss in loss_dict.values())
-
+            # Accumulate epoch loss
             epoch_loss += losses.item()
+
+            # Track all values (including cardinality_error) for logging/debugging
             for key, value in loss_dict.items():
                 loss_sums[key] += value.item()
 

@@ -84,6 +84,7 @@ def evaluate_model(model, test_loader, device, iou_threshold=0.5, conf_score=0.3
     with torch.no_grad():
         for images, targets in test_loader:
             images = [img.to(device) for img in images]
+            images = torch.stack(images, dim=0)
             preds = model(images)
             # Update it with your batches
             metric.update(preds, targets)

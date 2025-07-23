@@ -11,7 +11,7 @@ if __name__ == '__main__':
     parser.add_argument('--annotations_csv_file', type=str, help='annotations csv file')
     parser.add_argument('--spreadsheets_folder', type=str, help='preprocessed files path')
     parser.add_argument('--output_folder', type=str, help='preprocessed files path')
-    parser.add_argument('--max_workers', int=str, default=8, help='preprocessed files path')
+    parser.add_argument('--max_workers', type=int, default=8, help='preprocessed files path')
 
     args = parser.parse_args()
 

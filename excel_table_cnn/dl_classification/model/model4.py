@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torchvision
 from torchvision.models.detection import fcos_resnet50_fpn
+from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
 from torchvision.models.detection.transform import GeneralizedRCNNTransform
 
 class FCOSMobileNetMapped(nn.Module):
@@ -14,7 +15,7 @@ class FCOSMobileNetMapped(nn.Module):
         )
 
         # Initialize FCOS base model
-        self.detector = fcos_resnet50_fpn(pretrained=pretrained)
+        self.detector = resnet_fpn_backbone('resnet18', pretrained=True)
 
         # Update the number of output classes
         in_features = self.detector.head.classification_head.conv[0].in_channels

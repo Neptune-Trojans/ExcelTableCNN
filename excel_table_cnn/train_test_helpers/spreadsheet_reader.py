@@ -29,23 +29,29 @@ class SpreadsheetReader:
         wb = openpyxl.load_workbook(file_path)
         ws = wb[sheet_name]
 
-        min_row = 1
         max_row = min(ws.max_row, self._map_height)
-        min_col = 1
         max_col = min(ws.max_column, self._map_width)
+        num_feats = self._num_cell_features
 
-        sheet_tensor = np.zeros((max_row, max_col, self._num_cell_features), dtype=np.float32)
+        # Pre-allocate flat array
+        sheet_tensor = np.zeros((max_row, max_col, num_feats), dtype=np.float32)
 
-        for row_idx, row in enumerate(ws.iter_rows(min_row=min_row, max_row=max_row, min_col=min_col, max_col=max_col)):
+        # Avoid small NumPy arrays per cell
+        feature_array = np.empty(num_feats, dtype=np.float32)
+
+        for row_idx, row in enumerate(ws.iter_rows(min_row=1, max_row=max_row, min_col=1, max_col=max_col)):
             for col_idx, cell in enumerate(row):
                 features = get_cell_features_xlsx(cell)
-                feature_matrix = np.array([float(features[key]) for key in feature_order], dtype=np.float32)
-                sheet_tensor[row_idx, col_idx] = feature_matrix
+                for i, key in enumerate(feature_order):
+                    feature_array[i] = float(features[key])
+                sheet_tensor[row_idx, col_idx] = feature_array
 
+        
         gt_tables = np.array([parse_table_range(area) for area in tables_area], dtype=np.int64)
+
         # Convert to torch tensors
-        sheet_tensor = torch.from_numpy(sheet_tensor)  # shape: (H, W, F)
-        gt_tables = torch.from_numpy(gt_tables)  # shape: (N, 4)
+        sheet_tensor = torch.from_numpy(sheet_tensor)
+        gt_tables = torch.from_numpy(gt_tables)
 
         return sheet_tensor, gt_tables
 

@@ -1,11 +1,14 @@
 import torch
-import torch.nn as nn
 import torchvision
-from torchvision.models.detection import fcos_resnet50_fpn
-from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
+from torchvision.models.detection import FasterRCNN
+from torchvision.models.detection.rpn import AnchorGenerator
 from torchvision.models.detection.transform import GeneralizedRCNNTransform
+from torchvision.models.detection.backbone_utils import mobilenet_backbone
+from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
-class FCOSMobileNetMapped(nn.Module):
+import torch.nn as nn
+
+class FasterRCNNMobileNetMapped2(nn.Module):
     def __init__(self, input_channels, num_classes, image_size=(400, 400), pretrained=True):
         super().__init__()
 
@@ -14,30 +17,46 @@ class FCOSMobileNetMapped(nn.Module):
             nn.ReLU()
         )
 
-        # Initialize FCOS base model
-        self.detector = resnet_fpn_backbone('resnet18', pretrained=True)
+        # Backbone with FPN
+        backbone = mobilenet_backbone('mobilenet_v3_large', pretrained=pretrained, fpn=True)
 
-        # Update the number of output classes
-        in_features = self.detector.head.classification_head.conv[0].in_channels
-        num_anchors = self.detector.head.classification_head.num_anchors
-        self.detector.head.classification_head.num_classes = num_classes
-        self.detector.head.classification_head.cls_logits = nn.Conv2d(
-            in_features, num_anchors * num_classes, kernel_size=3, stride=1, padding=1
+        featmap_keys = ['0', '1', 'pool']
+        # Anchor generator — match number of feature maps
+        anchor_generator = AnchorGenerator(
+            sizes=tuple([(32,), (64,), (128,)]),
+            #sizes=tuple([(16, 32), (64,), (128,)]),
+            aspect_ratios=tuple([(0.1, 0.25, 0.5, 1.0, 2.0)] * len(featmap_keys))
+
         )
 
-        # Adjust transform for input normalization and resizing
-        self.detector.transform = GeneralizedRCNNTransform(
-            min_size=image_size[0],
-            max_size=image_size[1],
-            image_mean=[0.0, 0.0, 0.0],
-            image_std=[1.0, 1.0, 1.0]
+        # RoI Pooler — match feature map keys
+        roi_pooler = torchvision.ops.MultiScaleRoIAlign(
+            featmap_names=featmap_keys,
+            output_size=7,
+            sampling_ratio=2
         )
+
+        # Full model
+        self.detector = FasterRCNN(
+            backbone,
+            num_classes=num_classes,
+            rpn_anchor_generator=anchor_generator,
+            box_roi_pool=roi_pooler,
+            transform=GeneralizedRCNNTransform(
+                min_size=image_size[0],
+                max_size=image_size[1],
+                image_mean=[0.0, 0.0, 0.0],
+                image_std=[1.0, 1.0, 1.0]
+            )
+        )
+
+        in_features = self.detector.roi_heads.box_predictor.cls_score.in_features
+        self.detector.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
 
     def forward(self, x, targets=None):
-        # Normalize each sample individually
         x = [(img - img.mean()) / (img.std() + 1e-6) for img in x]
-        x = [self.channel_mapper(img) for img in x]
 
+        x = [self.channel_mapper(img) for img in x]
         if self.training:
             return self.detector(x, targets)
         else:

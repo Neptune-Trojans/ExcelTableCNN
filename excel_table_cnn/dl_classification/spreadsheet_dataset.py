@@ -163,4 +163,10 @@ class SpreadsheetDataset(Dataset):
         tensor = feature_map.permute(2, 0, 1)
         print(labels['boxes'])
         print(labels['boxes'].device)
+
+        print(labels['labels'])
+        print(labels['labels'].device)
+
+        print(tensor)
+        print(tensor.device)
         return tensor, labels

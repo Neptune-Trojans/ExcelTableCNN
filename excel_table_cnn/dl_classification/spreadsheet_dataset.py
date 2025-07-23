@@ -145,9 +145,10 @@ class SpreadsheetDataset(Dataset):
         feature_map = torch.load(file_name)
 
         boxes = feature_map['gt_tables']
+        boxes = boxes.to(dtype=torch.float32)
         boxes[:, [0, 2]] /= self._sp_reader._map_width
         boxes[:, [1, 3]] /= self._sp_reader._map_height
-        
+
         feature_map = feature_map['sheet_tensor']
 
         # background_idx = random.randint(0, len(self._backgrounds) - 1)

@@ -24,7 +24,7 @@ class DetrResNet18Mapped(nn.Module):
         x = self.input_mapper(x)  # → (B, 3, H, W)
 
         if self.training:
-            return self.detr(x, targets)
+            return self.detr(x, labels=targets)
         else:
             return self.detr(x)
 

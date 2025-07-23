@@ -161,12 +161,7 @@ class SpreadsheetDataset(Dataset):
         # Permute tensor to C x H x W
         feature_map = self.pad_feature_map(feature_map, device=self._device)
         tensor = feature_map.permute(2, 0, 1)
-        print(labels['boxes'])
-        print(labels['boxes'].device)
-
-        print(labels['labels'])
-        print(labels['labels'].device)
-
-        print(tensor)
-        print(tensor.device)
+        print(labels['boxes'].dtype)
+        print(labels['labels'].dtype)
+        print(tensor.dtype)
         return tensor, labels

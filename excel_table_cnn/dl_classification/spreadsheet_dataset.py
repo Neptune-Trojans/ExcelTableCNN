@@ -146,8 +146,8 @@ class SpreadsheetDataset(Dataset):
 
         boxes = feature_map['gt_tables']
         boxes = boxes.to(dtype=torch.float32)
-        boxes[:, [0, 2]] /= self._sp_reader._map_width
-        boxes[:, [1, 3]] /= self._sp_reader._map_height
+        boxes[:, [0, 2]] /= float(self._sp_reader._map_width)
+        boxes[:, [1, 3]] /= float(self._sp_reader._map_height)
 
         feature_map = feature_map['sheet_tensor']
 

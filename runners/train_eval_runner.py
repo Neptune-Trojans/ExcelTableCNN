@@ -10,7 +10,7 @@ import wandb
 from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
 
-from excel_table_cnn.dl_classification.load_datasets import DatasetManager
+
 from excel_table_cnn.dl_classification.model.train_eval import get_model, train_model, evaluate_model
 from excel_table_cnn.dl_classification.spreadsheet_dataset import SpreadsheetDataset
 from excel_table_cnn.train_test_helpers.spreadsheet_reader import SpreadsheetReader
@@ -47,8 +47,8 @@ if __name__ == '__main__':
 
     run_name = f"run-{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
 
-    train_df = labels_df.iloc[:1000].copy()
-    val_df = labels_df.iloc[1000:].copy()
+    train_df = labels_df.iloc[500:].copy()
+    val_df = labels_df.iloc[:500].copy()
 
 
     init_dataframe_view()
